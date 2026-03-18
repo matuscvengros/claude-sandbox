@@ -46,7 +46,13 @@ docker compose --profile safe run --rm claude-safe
 
 Prompt mode:
 ```bash
-docker compose run --rm claude "build a REST API for todos"
+docker compose run --rm claude -- -p "build a REST API for todos"
+```
+
+Passing flags to Claude (use `--` to separate docker flags from claude flags):
+```bash
+docker compose run --rm claude -- --model opus
+docker compose run --rm claude -- --model opus -p "build a REST API"
 ```
 
 > Use `--rm` to automatically remove the container after it exits.
@@ -57,12 +63,15 @@ Add to your shell profile for seamless usage:
 ```bash
 alias claudesb='docker compose -f ~/Documents/projects/claude-docker/docker-compose.yml run --rm claude'
 alias claudesafe='docker compose -f ~/Documents/projects/claude-docker/docker-compose.yml --profile safe run --rm claude-safe'
+alias cc='docker compose -f ~/Documents/projects/claude-docker/docker-compose.yml run --rm claude -- --model opus'
 ```
 
 Then from any project directory:
 ```bash
 cd ~/my-project
-claudesb
+claudesb            # interactive, default model
+cc                  # interactive, opus model
+cc -p "fix the bug" # prompt mode, opus model
 ```
 
 ## Mount layout (default)

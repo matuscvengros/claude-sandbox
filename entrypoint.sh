@@ -15,10 +15,5 @@ if [ -n "$SSH_PRIVATE_KEY_B64" ]; then
   chmod 600 /home/claude/.ssh/id_ed25519
 fi
 
-if [ $# -gt 0 ]; then
-  # Prompt mode: run non-interactively with a single string argument
-  exec claude --dangerously-skip-permissions -p "$1"
-else
-  # Interactive mode: drop into Claude REPL
-  exec claude --dangerously-skip-permissions
-fi
+# Pass all arguments through to claude
+exec claude --dangerously-skip-permissions "$@"
