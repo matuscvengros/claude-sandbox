@@ -10,12 +10,13 @@ services:
       - ${PWD}:/home/claude/project
       # Read-only host filesystem access
       - ${HOME}:/home/host:ro
+      # Mask secret files (not directories) with /dev/null
+      - /dev/null:/home/host/.npmrc:ro
     tmpfs:
       # Secrets masking — tmpfs overlays hide the real directories beneath
       - /home/host/.ssh:ro,size=0
       - /home/host/.config:ro,size=0
       - /home/host/.docker:ro,size=0
-      - /home/host/.npmrc:ro,size=0
       - /home/host/.orbstack:ro,size=0
       - /home/host/Library/Keychains:ro,size=0
     stdin_open: true
@@ -33,5 +34,5 @@ services:
       - ${PWD}:/home/claude/project
     stdin_open: true
     tty: true
-    network_mode: bridge
+    network_mode: none
     profiles: ["safe"]
