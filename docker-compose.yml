@@ -1,0 +1,44 @@
+services:
+  claude:
+    build:
+      context: .
+      target: default
+    env_file: .env
+    working_dir: /home/claude/project
+    volumes:
+      # R/W project workspace — mounts caller's current directory
+      - ${PWD}:/home/claude/project
+      # Read-only host filesystem access
+      - ${HOME}:/host/home:ro
+    tmpfs:
+      # Secrets masking — tmpfs overlays hide the real directories beneath
+      # - /host/home/.ssh:ro,size=0
+      # - /host/home/.gnupg:ro,size=0
+      # - /host/home/.aws:ro,size=0
+      # - /host/home/.azure:ro,size=0
+      # - /host/home/.config/gcloud:ro,size=0
+      # - /host/home/.config/gh:ro,size=0
+      # - /host/home/.docker:ro,size=0
+      # - /host/home/.npmrc:ro,size=0
+      # - /host/home/.netrc:ro,size=0
+      # - /host/home/.kube:ro,size=0
+      # - /host/home/.orbstack:ro,size=0
+      # - /host/home/Library/Keychains:ro,size=0
+    stdin_open: true
+    tty: true
+    network_mode: bridge
+    profiles: ["default"]
+
+  claude-safe:
+    build:
+      context: .
+      target: safe
+    env_file: .env
+    working_dir: /home/claude/project
+    volumes:
+      # R/W project workspace only — no host filesystem access
+      - ${PWD}:/home/claude/project
+    stdin_open: true
+    tty: true
+    network_mode: bridge
+    profiles: ["safe"]
