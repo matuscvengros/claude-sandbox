@@ -1,22 +1,20 @@
 services:
   sandbox:
-    build: .
-    env_file: .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: ../.env
     working_dir: /home/node/project
     volumes:
-      # R/W project workspace — mounts caller's current directory
-      - ${PWD}:/home/node/project
-      # Read-only host filesystem access
+      # Read-only host filesystem access (same as standalone)
       - ${HOME}:/home/host:ro
-      # Mask secret files (not directories) with /dev/null
+      # Mask secret files with /dev/null
       - /dev/null:/home/host/.npmrc:ro
     tmpfs:
-      # Secrets masking — tmpfs overlays hide the real directories beneath
+      # Secrets masking — tmpfs overlays hide sensitive host directories
       - /home/host/.ssh:ro,size=0
       - /home/host/.config:ro,size=0
       - /home/host/.docker:ro,size=0
       - /home/host/.orbstack:ro,size=0
       - /home/host/Library/Keychains:ro,size=0
-    stdin_open: true
-    tty: true
     network_mode: bridge

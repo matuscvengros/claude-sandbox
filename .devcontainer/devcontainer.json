@@ -1,0 +1,24 @@
+{
+  "name": "Coding Agent Sandbox (DevContainer)",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "sandbox",
+  "workspaceFolder": "/home/node/project",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/home/node/project,type=bind,consistency=cached",
+  "remoteUser": "node",
+  "remoteEnv": {
+    "HOME": "/home/node"
+  },
+  "postStartCommand": "/bin/bash /home/node/project/.devcontainer/post-start.sh",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      },
+      "extensions": [
+        "ms-python.python",
+        "rust-lang.rust-analyzer",
+        "dbaeumer.vscode-eslint"
+      ]
+    }
+  }
+}

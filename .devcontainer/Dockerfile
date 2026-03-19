@@ -4,7 +4,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # --- ROOT OPERATIONS ---
 
-## System packages
+## System packages (Node.js already provided by base image)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential gcc g++ make cmake \
     git curl wget ca-certificates gnupg openssh-client \
@@ -20,19 +20,17 @@ ENV LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 ## Starship prompt
 RUN curl -sS https://starship.rs/install.sh | sh -s -- -y
 
-## Prepare node user home
-RUN mkdir -p /home/node/.claude /home/node/.config /home/node/.local/bin /home/node/.ssh /home/node/project
+## Prepare node user home and grant sudo
+RUN mkdir -p /home/node/.claude /home/node/.config /home/node/.local/bin /home/node/.ssh /home/node/project \
+  && echo "node ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/node
 
-## Copy files into image
-COPY entrypoint.sh /entrypoint.sh
-COPY .claude.json /home/node/.claude.json
+## Copy config files into image
+COPY claude.json /home/node/.claude.json
 COPY settings.json /home/node/.claude/settings.json
-COPY plugins/ /home/node/.claude/plugins/
 COPY known_hosts /home/node/.ssh/known_hosts
 
 ## Permissions
-RUN chmod +x /entrypoint.sh \
-  && chmod 700 /home/node/.ssh \
+RUN chmod 700 /home/node/.ssh \
   && chmod 644 /home/node/.ssh/known_hosts \
   && chown -R node:node /home/node
 
@@ -56,4 +54,3 @@ RUN git config --global user.name "Matus Cvengros" \
   && git config --global user.email "matus.cvengros@gmail.com"
 
 WORKDIR /home/node/project
-ENTRYPOINT ["/entrypoint.sh"]
