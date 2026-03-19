@@ -20,14 +20,14 @@ ENV LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 ## Starship prompt
 RUN curl -sS https://starship.rs/install.sh | sh -s -- -y
 
-## Prepare node user home
-RUN mkdir -p /home/node/.claude /home/node/.config /home/node/.local/bin /home/node/.ssh /home/node/project
+## Prepare node user home and grant sudo
+RUN mkdir -p /home/node/.claude /home/node/.config /home/node/.local/bin /home/node/.ssh /home/node/project \
+  && echo "node ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/node
 
 ## Copy files into image
 COPY entrypoint.sh /entrypoint.sh
 COPY .claude.json /home/node/.claude.json
 COPY settings.json /home/node/.claude/settings.json
-COPY plugins/ /home/node/.claude/plugins/
 COPY known_hosts /home/node/.ssh/known_hosts
 
 ## Permissions

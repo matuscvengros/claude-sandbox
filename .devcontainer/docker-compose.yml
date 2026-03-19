@@ -1,8 +1,9 @@
 services:
   sandbox:
     build:
-      context: .
+      context: ..
       dockerfile: Dockerfile
+    entrypoint: sleep infinity
     env_file: ../.env
     working_dir: /home/node/project
     volumes:

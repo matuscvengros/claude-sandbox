@@ -20,9 +20,7 @@ Docker container for running coding agents (Claude Code, OpenCode, Aider, etc.) 
    CODING_AGENT=claude
    ```
 
-2. Place any custom plugins in `plugins/` before building.
-
-3. Build:
+2. Build:
    ```bash
    docker compose build
    ```
@@ -96,10 +94,6 @@ Use both together: devcontainer for interactive work, standalone alias for fire-
 |---------------|-------------|--------|
 | `/home/node/project` | Caller's `$PWD` (standalone) or opened folder (devcontainer) | Read/Write |
 | `/home/host` | `$HOME` | Read-only (secrets masked) |
-
-## Plugins
-
-Place plugin directories in `plugins/` before building. They are copied into the image at `/home/node/.claude/plugins/`.
 
 ## Environment variables
 
