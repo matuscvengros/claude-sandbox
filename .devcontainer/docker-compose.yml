@@ -1,5 +1,5 @@
 services:
-  sandbox:
+  claude-sandbox:
     build:
       context: ..
       dockerfile: Dockerfile

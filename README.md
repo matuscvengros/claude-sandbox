@@ -1,5 +1,9 @@
 # Claude Code Docker Sandbox
 
+[![Build](https://github.com/matuscvengros/claude-docker-sandbox/actions/workflows/build.yml/badge.svg)](https://github.com/matuscvengros/claude-docker-sandbox/actions/workflows/build.yml)
+[![Docker](https://img.shields.io/badge/Docker-node%3A22-blue?logo=docker)](https://hub.docker.com/_/node)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Docker container for running Claude Code autonomously. Based on `node:22` (Debian Bookworm). Built for macOS hosts using OrbStack where Docker Sandbox isn't available.
 
 ## Pre-installed tools
@@ -30,18 +34,18 @@ Docker container for running Claude Code autonomously. Based on `node:22` (Debia
 
 Interactive mode:
 ```bash
-docker compose run --rm sandbox
+docker compose run --rm claude-sandbox
 ```
 
 Prompt mode:
 ```bash
-docker compose run --rm sandbox -- -p "build a REST API for todos"
+docker compose run --rm claude-sandbox -- -p "build a REST API for todos"
 ```
 
 Passing flags (use `--` to separate docker flags from claude flags):
 ```bash
-docker compose run --rm sandbox -- --model opus
-docker compose run --rm sandbox -- --model opus -p "build a REST API"
+docker compose run --rm claude-sandbox -- --model opus
+docker compose run --rm claude-sandbox -- --model opus -p "build a REST API"
 ```
 
 > Use `--rm` to automatically remove the container after it exits.
@@ -58,8 +62,8 @@ claude --dangerously-skip-permissions
 
 Add to your shell profile for seamless usage:
 ```bash
-alias sandbox='docker compose -f ~/Documents/projects/claude-docker/docker-compose.yml run --rm sandbox'
-alias cc='docker compose -f ~/Documents/projects/claude-docker/docker-compose.yml run --rm sandbox -- --model opus'
+alias sandbox='docker compose -f ~/Documents/projects/claude-docker/docker-compose.yml run --rm claude-sandbox'
+alias cc='docker compose -f ~/Documents/projects/claude-docker/docker-compose.yml run --rm claude-sandbox -- --model opus'
 ```
 
 Then from any project directory:
@@ -75,7 +79,7 @@ cc -p "fix the bug" # prompt mode, opus model
 | Aspect | Standalone | DevContainer |
 |--------|-----------|--------------|
 | **Use case** | Headless, fire-and-forget tasks | Interactive development with IDE |
-| **Launch** | `docker compose run --rm sandbox` | "Reopen in Container" in VS Code |
+| **Launch** | `docker compose run --rm claude-sandbox` | "Reopen in Container" in VS Code |
 | **Lifecycle** | Ephemeral — dies after Claude exits | Persistent while IDE is open |
 | **IDE features** | None — pure terminal | Extensions, debugger, source control |
 | **Claude launch** | Automatic via entrypoint | Manual in terminal |

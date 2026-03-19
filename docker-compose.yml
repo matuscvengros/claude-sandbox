@@ -1,5 +1,5 @@
 services:
-  sandbox:
+  claude-sandbox:
     image: claude-docker-sandbox
     build: .
     env_file: .env
