@@ -1,5 +1,6 @@
 services:
   sandbox:
+    image: claude-docker-sandbox
     build: .
     env_file: .env
     working_dir: /home/claude/project
