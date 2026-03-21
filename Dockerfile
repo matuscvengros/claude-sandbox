@@ -36,9 +36,23 @@ RUN echo "claude ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/claude
 
 ## SSH: known hosts
 COPY known_hosts /home/claude/.ssh/known_hosts
-COPY known_hosts /root/.ssh/known_hosts
 RUN chmod 700 /home/claude/.ssh
 RUN chmod 644 /home/claude/.ssh/known_hosts
+
+## Claude Code: config files
+RUN mkdir -p /home/claude/.claude
+COPY .claude.json /home/claude/.claude.json
+COPY settings.json /home/claude/.claude/settings.json
+
+## Finalize root: fix ownership
+RUN chown -R claude:claude /home/claude
+
+## Entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# --- USER OPERATIONS ---
+USER claude
 
 ## Shell: Starship config
 RUN starship preset bracketed-segments -o /home/claude/.config/starship.toml
@@ -48,13 +62,8 @@ RUN echo 'eval "$(starship init bash)"' >> /home/claude/.bashrc
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/home/claude/.cargo/bin:${PATH}"
 
-## Claude Code: config files
-RUN mkdir -p /home/claude/.claude
-COPY .claude.json /home/claude/.claude.json
-COPY settings.json /home/claude/.claude/settings.json
-
 ## Claude Code: install
-ENV PATH="/root/.local/bin:/home/claude/.local/bin:${PATH}"
+ENV PATH="/home/claude/.local/bin:${PATH}"
 RUN curl -fsSL https://claude.ai/install.sh | bash
 
 ## Claude Code: plugins
@@ -69,18 +78,8 @@ RUN claude plugin install superpowers@claude-plugins-official \
 ### Private plugins
 COPY --chown=claude:claude private-build/claude-plugins.sh /tmp/claude-plugins.sh
 RUN chmod +x /tmp/claude-plugins.sh
-RUN --mount=type=ssh bash /tmp/claude-plugins.sh
+RUN --mount=type=ssh sudo chmod 777 /run/buildkit/ssh_agent.* && bash /tmp/claude-plugins.sh
 RUN rm -f /tmp/claude-plugins.sh
-
-## Finalize root: fix ownership
-RUN chown -R claude:claude /home/claude
-
-## Entrypoint
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-# --- USER OPERATIONS ---
-USER claude
 
 WORKDIR /home/claude/project
 ENTRYPOINT ["/entrypoint.sh"]
