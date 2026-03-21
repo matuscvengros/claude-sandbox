@@ -5,6 +5,8 @@ services:
     env_file: .env
     working_dir: /home/claude/project
     volumes:
+      # Share host config folder for session persistence
+      # - ${HOME}/.claude.sandbox:/home/claude/.claude
       # R/W project workspace — mounts caller's current directory
       - ${PWD}:/home/claude/project
       # Read-only host home directory access

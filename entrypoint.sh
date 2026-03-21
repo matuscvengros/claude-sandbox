@@ -3,12 +3,6 @@ set -e
 
 export HOME=/home/claude
 
-# Recreate Claude credentials from base64-encoded env var
-if [ -n "$CLAUDE_CREDENTIALS_B64" ]; then
-  echo "$CLAUDE_CREDENTIALS_B64" | base64 -d > /home/claude/.claude/.credentials.json
-  chmod 600 /home/claude/.claude/.credentials.json
-fi
-
 # Recreate SSH key from base64-encoded env var
 if [ -n "$SSH_PRIVATE_KEY_B64" ]; then
   mkdir -p /home/claude/.ssh
