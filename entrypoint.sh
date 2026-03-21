@@ -7,9 +7,5 @@ export HOME=/home/claude
 source /home/claude/scripts/setup-credentials.sh
 rm -f /home/claude/scripts/setup-credentials.sh
 
-# Launch claude — skip permissions by default (sandbox environment)
-if [ "${CLAUDE_SKIP_PERMISSIONS:-true}" = "true" ]; then
-  exec claude --dangerously-skip-permissions "$@"
-else
-  exec claude "$@"
-fi
+# Pass all arguments through to claude
+exec claude "$@"

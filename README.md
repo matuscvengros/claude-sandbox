@@ -83,7 +83,7 @@ docker compose run --rm claude-sandbox -- --model opus -p "build a REST API"
 Open this repo (or any project containing `.devcontainer/`) in VS Code and select **"Reopen in Container"**. The container stays running while the IDE is open. Open a terminal to launch Claude:
 
 ```bash
-claude --dangerously-skip-permissions
+claude
 ```
 
 ### Aliases
@@ -140,7 +140,6 @@ Sensitive host directories (`.ssh`, `.config`, `.docker`, `.orbstack`, `Library/
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `CLAUDE_CODE_OAUTH_TOKEN` | Yes | OAuth token — picked up automatically by Claude CLI |
-| `CLAUDE_SKIP_PERMISSIONS` | No | Set to `false` to enable Claude's permission system (default: `true`) |
 | `GIT_USER_NAME` | No | Git committer name |
 | `GIT_USER_EMAIL` | No | Git committer email |
 | `SSH_PRIVATE_KEY_B64` | No | Base64-encoded SSH private key (`base64 -i ~/.ssh/id_ed25519`) |
