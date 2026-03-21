@@ -38,10 +38,6 @@ RUN mkdir -p /home/claude/.claude
 COPY claude/.claude.json /home/claude/.claude.json
 COPY claude/settings.json /home/claude/.claude/settings.json
 
-## Shared credential setup script
-COPY scripts/setup-credentials.sh /tmp/setup-credentials.sh
-RUN chmod +x /tmp/setup-credentials.sh
-
 ## Entrypoint
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
@@ -51,6 +47,10 @@ RUN chown -R claude:claude /home/claude
 
 # --- USER OPERATIONS ---
 USER claude
+
+## Shared credential setup script
+COPY --chown=claude:claude scripts/setup-credentials.sh /tmp/setup-credentials.sh
+RUN chmod +x /tmp/setup-credentials.sh
 
 ## Shell: Starship prompt
 RUN curl -sS https://starship.rs/install.sh | sh -s -- -y
@@ -94,5 +94,5 @@ FROM base AS full
 ### Private plugins
 COPY --chown=claude:claude private-build/claude-plugins.sh /tmp/claude-plugins.sh
 RUN chmod +x /tmp/claude-plugins.sh
-RUN --mount=type=ssh sudo chmod 777 /run/buildkit/ssh_agent.* && bash /tmp/claude-plugins.sh
+RUN --mount=type=ssh sudo chmod 666 /run/buildkit/ssh_agent.* && bash /tmp/claude-plugins.sh
 RUN rm -f /tmp/claude-plugins.sh
