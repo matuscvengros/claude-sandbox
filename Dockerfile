@@ -94,5 +94,5 @@ FROM base AS full
 ### Private plugins
 COPY --chown=claude:claude private-build/claude-plugins.sh /tmp/claude-plugins.sh
 RUN chmod +x /tmp/claude-plugins.sh
-RUN --mount=type=ssh sudo chmod 666 /run/buildkit/ssh_agent.* && bash /tmp/claude-plugins.sh
+RUN --mount=type=ssh sudo chmod 777 /run/buildkit/ssh_agent.* && bash /tmp/claude-plugins.sh
 RUN rm -f /tmp/claude-plugins.sh

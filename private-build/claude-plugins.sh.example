@@ -4,10 +4,5 @@ set -e
 # Ensure git can find the BuildKit SSH socket
 export SSH_AUTH_SOCK=$(ls /run/buildkit/ssh_agent.* 2>/dev/null | head -1)
 
-if [ -z "$SSH_AUTH_SOCK" ]; then
-  echo "ERROR: No SSH agent socket found. Build with '--ssh default' with agent or '--ssh default==$HOME/.ssh/ssh-key' for a specific key."
-  exit 1
-fi
-
 # claude plugin marketplace add <https or ssh github link / local folder>
 # claude plugin install <plugin>@<private-marketplace>
