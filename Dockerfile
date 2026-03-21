@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # CLI utilities
     ripgrep fd-find jq unzip \
     # System
-    sudo locales \
+    sudo locales socat \
  && rm -rf /var/lib/apt/lists/*
 
 ## Locale
