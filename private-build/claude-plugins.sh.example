@@ -1,8 +1,5 @@
 #!/bin/bash
 set -e
 
-# Ensure git can find the BuildKit SSH socket
-export SSH_AUTH_SOCK=$(ls /run/buildkit/ssh_agent.* 2>/dev/null | head -1)
-
 # claude plugin marketplace add <https or ssh github link / local folder>
 # claude plugin install <plugin>@<private-marketplace>

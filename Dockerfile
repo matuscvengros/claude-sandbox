@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ripgrep fd-find jq unzip \
     # System
     sudo locales socat \
- && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
 ## Locale
 RUN sed -i '/en_US.UTF-8/s/^# //' /etc/locale.gen \
@@ -24,10 +24,10 @@ ENV LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 
 ## User: remove default node user, create claude user
 RUN userdel -r node \
- && useradd -m -s /bin/bash -u 1000 claude \
- && mkdir -p /home/claude/.config /home/claude/.local/bin /home/claude/.ssh /home/claude/.claude /home/claude/project \
- && chmod 700 /home/claude/.ssh \
- && echo "claude ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/claude
+    && useradd -m -s /bin/bash -u 1000 claude \
+    && mkdir -p /home/claude/.config /home/claude/.local/bin /home/claude/.ssh /home/claude/.claude /home/claude/project \
+    && chmod 700 /home/claude/.ssh \
+    && echo "claude ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/claude
 
 ## SSH: known hosts
 COPY --chmod=644 ssh/known_hosts /home/claude/.ssh/known_hosts
@@ -50,8 +50,8 @@ COPY --chmod=755 --chown=claude:claude scripts/setup-credentials.sh /tmp/setup-c
 
 ## Shell: Starship prompt
 RUN curl -sS https://starship.rs/install.sh | sh -s -- -y \
- && starship preset bracketed-segments -o /home/claude/.config/starship.toml \
- && echo 'eval "$(starship init bash)"' >> /home/claude/.bashrc
+    && starship preset bracketed-segments -o /home/claude/.config/starship.toml \
+    && echo 'eval "$(starship init bash)"' >> /home/claude/.bashrc
 
 ## Claude Code: install
 ENV PATH="/home/claude/.local/bin:${PATH}"
@@ -61,22 +61,22 @@ RUN curl -fsSL https://claude.ai/install.sh | bash
 ### Official Anthropics plugins
 RUN claude plugin marketplace add anthropics/claude-plugins-official
 RUN claude plugin install superpowers@claude-plugins-official \
- && claude plugin install firecrawl@claude-plugins-official \
- && claude plugin install frontend-design@claude-plugins-official \
- && claude plugin install playwright@claude-plugins-official \
- && claude plugin install pyright-lsp@claude-plugins-official \
- && claude plugin install typescript-lsp@claude-plugins-official \
- && claude plugin install code-review@claude-plugins-official \
- && claude plugin install commit-commands@claude-plugins-official \
- && claude plugin install code-simplifier@claude-plugins-official \
- && claude plugin install context7@claude-plugins-official \
- && claude plugin install claude-md-management@claude-plugins-official \
- && claude plugin install explanatory-output-style@claude-plugins-official \
- && claude plugin install learning-output-style@claude-plugins-official \
- && claude plugin install claude-code-setup@claude-plugins-official \
- && claude plugin install feature-dev@claude-plugins-official \
- && claude plugin install security-guidance@claude-plugins-official \
- && claude plugin install github@claude-plugins-official
+    && claude plugin install firecrawl@claude-plugins-official \
+    && claude plugin install frontend-design@claude-plugins-official \
+    && claude plugin install playwright@claude-plugins-official \
+    && claude plugin install pyright-lsp@claude-plugins-official \
+    && claude plugin install typescript-lsp@claude-plugins-official \
+    && claude plugin install code-review@claude-plugins-official \
+    && claude plugin install commit-commands@claude-plugins-official \
+    && claude plugin install code-simplifier@claude-plugins-official \
+    && claude plugin install context7@claude-plugins-official \
+    && claude plugin install claude-md-management@claude-plugins-official \
+    && claude plugin install explanatory-output-style@claude-plugins-official \
+    && claude plugin install learning-output-style@claude-plugins-official \
+    && claude plugin install claude-code-setup@claude-plugins-official \
+    && claude plugin install feature-dev@claude-plugins-official \
+    && claude plugin install security-guidance@claude-plugins-official \
+    && claude plugin install github@claude-plugins-official
 
 HEALTHCHECK --interval=30s --timeout=5s CMD claude --version || exit 1
 
@@ -88,6 +88,8 @@ FROM base AS full
 
 ### Private plugins
 COPY --chmod=755 --chown=claude:claude private-build/claude-plugins.sh /tmp/claude-plugins.sh
-RUN --mount=type=ssh sudo chmod 666 /run/buildkit/ssh_agent.* \
- && bash /tmp/claude-plugins.sh \
- && rm -f /tmp/claude-plugins.sh
+RUN --mount=type=ssh \
+    export SSH_AUTH_SOCK=$(ls /run/buildkit/ssh_agent.* 2>/dev/null | head -1) \
+    && sudo chmod 666 /run/buildkit/ssh_agent.* \
+    && bash /tmp/claude-plugins.sh \
+    && rm -f /tmp/claude-plugins.sh

@@ -1,6 +1,7 @@
 services:
   claude-sandbox:
     image: claude-docker-sandbox
+    user: claude
     build:
       context: .
       target: ${BUILD_TARGET:-base}
