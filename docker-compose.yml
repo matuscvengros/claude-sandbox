@@ -18,8 +18,6 @@ services:
       - ${HOME}:/home/host:ro
       # SSH agent forwarding (falls back to /dev/null if no agent on host)
       - ${SSH_AUTH_SOCK:-/dev/null}:/ssh-agent:ro
-      # Mask secret files (not directories) with /dev/null
-      - /dev/null:/home/host/.npmrc:ro
     tmpfs:
       # Secrets masking — tmpfs overlays hide the real directories beneath
       - /home/host/.ssh:ro,size=0
