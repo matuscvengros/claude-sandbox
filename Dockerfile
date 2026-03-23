@@ -85,6 +85,7 @@ HEALTHCHECK --interval=30s --timeout=5s CMD claude --version || exit 1
 
 WORKDIR /home/claude/project
 ENTRYPOINT ["/entrypoint.sh"]
+CMD ["claude"]
 
 # --- FULL: base + private plugins ---
 FROM base AS full

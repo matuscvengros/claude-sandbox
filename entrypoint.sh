@@ -7,5 +7,5 @@ export HOME=/home/claude
 source /tmp/setup-credentials.sh
 rm -f /tmp/setup-credentials.sh
 
-# Pass all arguments through to claude
-exec claude "$@"
+# Run CMD (defaults to "claude" — override with e.g. "bash")
+exec "$@"

@@ -69,10 +69,13 @@ Add these to your `~/.bashrc` or `~/.zshrc` for seamless usage from any director
 CLAUDE_DOCKER="$HOME/path/to/claude-docker-sandbox"
 
 # Isolated sandbox — ephemeral, no state persisted between runs
-alias cc="docker compose -f $CLAUDE_DOCKER/docker-compose.yml run --rm claude-sandbox"
+alias cc="docker compose -f $CLAUDE_DOCKER/docker-compose.yml run --rm claude-sandbox claude"
+
+# Drop into a shell instead of Claude
+alias ccbash="docker compose -f $CLAUDE_DOCKER/docker-compose.yml run --rm claude-sandbox bash"
 
 # Shared sandbox — persists Claude state (memory, sessions, plugins) across runs
-alias ccshared="docker compose -f $CLAUDE_DOCKER/docker-compose.yml run --rm -v $HOME/.claude.sandbox:/home/claude/.claude claude-sandbox"
+alias ccshared="docker compose -f $CLAUDE_DOCKER/docker-compose.yml run --rm -v $HOME/.claude.sandbox:/home/claude/.claude claude-sandbox claude"
 ```
 
 Then from any project directory:
@@ -84,11 +87,14 @@ cc                            # interactive, isolated
 cc -- -p "build a REST API"   # prompt mode, isolated
 cc -- --model sonnet          # override default model
 
+ccbash                        # shell access, isolated
 ccshared                      # interactive, persistent state
 ccshared -- -p "continue"     # prompt mode, persistent state
 ```
 
 **`cc`** gives you a clean, disposable sandbox every time — Claude starts fresh with no memory of previous sessions.
+
+**`ccbash`** drops you into a bash shell inside the sandbox for manual inspection or setup.
 
 **`ccshared`** maps `~/.claude.sandbox` on your host to the container's Claude config directory. This preserves conversation history, project memory, and plugin state across runs. The directory is created automatically on first use.
 
