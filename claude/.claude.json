@@ -1,6 +1,6 @@
 {
   "hasCompletedOnboarding": true,
-  "autoUpdates": false,
+  "autoUpdates": true,
   "officialMarketplaceAutoInstallAttempted": true,
   "officialMarketplaceAutoInstalled": true,
   "projects": {
