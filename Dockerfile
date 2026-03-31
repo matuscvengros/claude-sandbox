@@ -59,7 +59,7 @@ RUN curl -fsSL https://claude.ai/install.sh | bash
 
 ## Claude Code: plugins
 ### QOL plugins
-RUN npx claude-context-window@latest install
+RUN npx claude-statusline-atomic@latest install
 
 ### Official Anthropics plugins
 RUN claude plugin marketplace add anthropics/claude-plugins-official
