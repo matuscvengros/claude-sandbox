@@ -3,7 +3,7 @@
   "build": {
     "dockerfile": "../Dockerfile",
     "context": "..",
-    "target": "base"
+    "target": "${localEnv:BUILD_TARGET:base}"
   },
   "overrideCommand": true,
   "workspaceMount": "source=${localWorkspaceFolder},target=/home/claude/project,type=bind",
@@ -16,7 +16,7 @@
     "SSH_AUTH_SOCK": "/ssh-agent"
   },
   "mounts": [
-    "source=${localEnv:SSH_AUTH_SOCK},target=/ssh-agent,type=bind,readonly",
+    "source=${localEnv:SSH_AUTH_SOCK:/dev/null},target=/ssh-agent,type=bind,readonly",
     "source=${localEnv:HOME},target=/home/host,type=bind,readonly",
     "source=/dev/null,target=/home/host/.npmrc,type=bind,readonly"
   ],
