@@ -175,7 +175,7 @@ The DevContainer comes with VS Code extensions for Python, Rust Analyzer, and ES
 | **Lifecycle** | Ephemeral — dies after Claude exits | Persistent while IDE is open |
 | **IDE features** | None — pure terminal | Extensions, debugger, source control |
 | **Claude launch** | Automatic via entrypoint | Manual in terminal |
-| **Host home access** | No | Yes (read-only at `/home/host`) |
+| **Host home access** | No | No |
 
 ## SSH & authentication
 
@@ -258,33 +258,14 @@ claude plugin install your-plugin@your-plugins
 
 The script runs during the `private` build stage with the host's SSH agent forwarded, allowing access to private repositories.
 
-## Mount layout & security
-
-### Standalone (docker-compose)
+## Mount layout
 
 | Container path | Host source | Access | Purpose |
 |---------------|-------------|--------|---------|
 | `/home/claude/<folder-name>` | Caller's `$PWD` | Read/Write | Project workspace |
 | `/ssh-agent` | Host's `$SSH_AUTH_SOCK` | Read-only | SSH agent forwarding |
 
-### DevContainer
-
-The DevContainer additionally mounts the host home directory for reference, with sensitive paths masked:
-
-| Container path | Host source | Access | Purpose |
-|---------------|-------------|--------|---------|
-| `/home/claude/<folder-name>` | Workspace folder | Read/Write | Project workspace |
-| `/ssh-agent` | Host's `$SSH_AUTH_SOCK` | Read-only | SSH agent forwarding |
-| `/home/host` | `$HOME` | Read-only | Host home directory |
-
-Sensitive host directories are masked with empty tmpfs overlays to prevent container access:
-
-- `/home/host/.ssh` — SSH keys and config
-- `/home/host/.config` — application configurations
-- `/home/host/.docker` — Docker credentials
-- `/home/host/.orbstack` — OrbStack configuration
-- `/home/host/Library/Keychains` — macOS keychains
-- `/home/host/.npmrc` — npm credentials (mounted as `/dev/null`)
+Both standalone and DevContainer modes use the same mount layout.
 
 ## Environment variables
 

@@ -4,4 +4,5 @@ set -e
 export HOME=/home/claude
 
 # Shared setup: SSH key + git identity
-source /home/claude/project/scripts/setup-credentials.sh
+SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+source "$SCRIPT_DIR/scripts/setup-credentials.sh"

@@ -16,19 +16,12 @@
     "SSH_AUTH_SOCK": "/ssh-agent"
   },
   "mounts": [
-    "source=${localEnv:SSH_AUTH_SOCK:/dev/null},target=/ssh-agent,type=bind,readonly",
-    "source=${localEnv:HOME},target=/home/host,type=bind,readonly",
-    "source=/dev/null,target=/home/host/.npmrc,type=bind,readonly"
+    "source=${localEnv:SSH_AUTH_SOCK:/dev/null},target=/ssh-agent,type=bind,readonly"
   ],
   "runArgs": [
-    "--env-file", "${localWorkspaceFolder}/.env",
-    "--tmpfs", "/home/host/.ssh:ro,size=0",
-    "--tmpfs", "/home/host/.config:ro,size=0",
-    "--tmpfs", "/home/host/.docker:ro,size=0",
-    "--tmpfs", "/home/host/.orbstack:ro,size=0",
-    "--tmpfs", "/home/host/Library/Keychains:ro,size=0"
+    "--env-file", "${localWorkspaceFolder}/.env"
   ],
-  "postStartCommand": "/bin/bash /home/claude/project/.devcontainer/post-start.sh",
+  "postStartCommand": "/bin/bash ${containerWorkspaceFolder}/.devcontainer/post-start.sh",
   "customizations": {
     "vscode": {
       "settings": {
