@@ -14,17 +14,8 @@ services:
     volumes:
       # R/W project workspace — mounts caller's current directory
       - ${PWD}:/home/claude/project
-      # Read-only host home directory access
-      - ${HOME}:/home/host:ro
       # SSH agent forwarding (falls back to /dev/null if no agent on host)
       - ${SSH_AUTH_SOCK:-/dev/null}:/ssh-agent:ro
-    tmpfs:
-      # Secrets masking — tmpfs overlays hide the real directories beneath
-      - /home/host/.ssh:ro,size=0
-      - /home/host/.config:ro,size=0
-      - /home/host/.docker:ro,size=0
-      - /home/host/.orbstack:ro,size=0
-      - /home/host/Library/Keychains:ro,size=0
     stdin_open: true
     tty: true
     network_mode: bridge

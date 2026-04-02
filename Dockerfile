@@ -1,7 +1,7 @@
 # ===========================================================================
 # Base image
 # ===========================================================================
-FROM node:22 AS base
+FROM node:24 AS base
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -22,6 +22,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # System
     sudo locales socat \
     && rm -rf /var/lib/apt/lists/*
+
+# -- npm: Upgrade to Latest -------------------------------------------------
+RUN npm install -g npm@latest
 
 # -- Locale -----------------------------------------------------------------
 RUN sed -i '/en_US.UTF-8/s/^# //' /etc/locale.gen \
@@ -72,7 +75,7 @@ RUN curl -fsSL https://claude.ai/install.sh | bash
 RUN npx claude-statusline-atomic@latest install
 
 ## Tools
-RUN npm install -g firecrawl-cli
+RUN sudo npm install -g firecrawl-cli
 
 ## Official Marketplace
 RUN claude plugin marketplace add anthropics/claude-plugins-official
@@ -119,7 +122,7 @@ CMD ["bash"]
 # ===========================================================================
 # Full: base + private plugins
 # ===========================================================================
-FROM base AS full
+FROM base AS private
 
 # -- Private Plugins --------------------------------------------------------
 COPY --chmod=755 --chown=claude:claude private-build/claude-plugins.sh /tmp/claude-plugins.sh
