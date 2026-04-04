@@ -1,4 +1,4 @@
-# Claude Docker Sandbox launcher
+# Claude Docker Sandbox Launcher
 # Usage: cc [options] [-- extra args passed to claude/container]
 #   cc                  Run Claude with persistent state
 #   cc -is, --isolated  Run Claude in ephemeral mode (no host state)
