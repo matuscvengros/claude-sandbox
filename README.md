@@ -296,8 +296,8 @@ Both standalone and DevContainer modes use the same mount layout.
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `CLAUDE_CODE_OAUTH_TOKEN` | Yes | OAuth token for Claude CLI authentication |
-| `BUILD_TARGET` | No | Build target: `base` (default) or `private` (set inline, not in `.env`) |
 | `BASE_IMAGE` | No | Base image for `private` target: `base` (local, default) or GHCR image URL |
+| `BUILD_TARGET` | No | Build target: `base` (default) or `private` (set inline, not in `.env`) |
 | `GITHUB_TOKEN` | No | Token for GitHub CLI (`gh`) commands |
 | `GITHUB_PERSONAL_ACCESS_TOKEN` | No | Token for the GitHub MCP plugin |
 | `GIT_USER_NAME` | No | Git committer name |
