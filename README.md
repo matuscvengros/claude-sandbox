@@ -263,10 +263,10 @@ When `BASE_IMAGE` is set to a GHCR image (see `.env.example`), the `private` tar
 To add private plugins, copy the example and add your plugin commands:
 
 ```bash
-cp private-build/claude-plugins.sh.example private-build/claude-plugins.sh
+cp private/claude-plugins.sh.example private/claude-plugins.sh
 ```
 
-Edit `private-build/claude-plugins.sh` to install your plugins:
+Edit `private/claude-plugins.sh` to install your plugins:
 
 ```bash
 #!/bin/bash
@@ -309,7 +309,7 @@ Runs on every push and pull request to `main`. Builds the `base` target with Doc
 
 ### Publish workflow
 
-Runs nightly at midnight AEST (14:00 UTC) and on manual trigger. Builds the `base` target for `linux/amd64` and `linux/arm64`, and pushes to GHCR with the `latest` tag. This keeps the public image up to date with the latest Claude Code CLI version.
+Runs nightly (14:00 UTC) and on manual trigger. Builds the `base` target for `linux/amd64` and `linux/arm64`, and pushes to GHCR with the `latest` tag. This keeps the public image up to date with the latest Claude Code CLI version.
 
 ```bash
 docker pull ghcr.io/matuscvengros/claude-sandbox:latest

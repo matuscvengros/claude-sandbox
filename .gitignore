@@ -5,4 +5,4 @@ CLAUDE.md
 .credentials.json
 
 # Private Build Files
-private-build/claude-plugins.sh
+private/claude-plugins.sh

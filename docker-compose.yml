@@ -1,3 +1,4 @@
+name: claude-sandbox
 services:
   claude-sandbox:
     image: claude-sandbox
