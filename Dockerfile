@@ -1,3 +1,8 @@
+# Global ARG: controls which image the 'private' stage builds on.
+# - "base"               → build everything locally (default)
+# - "ghcr.io/user/repo"  → pull pre-built public image, skip local base build
+ARG BASE_IMAGE=base
+
 # ===========================================================================
 # Base image
 # ===========================================================================
@@ -124,7 +129,7 @@ CMD ["bash"]
 # ===========================================================================
 # Full: base + private plugins
 # ===========================================================================
-FROM base AS private
+FROM ${BASE_IMAGE} AS private
 
 # -- Private Plugins --------------------------------------------------------
 COPY --chmod=755 --chown=claude:claude private/claude-plugins.sh /tmp/claude-plugins.sh

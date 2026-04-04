@@ -39,7 +39,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }}
+          images: ghcr.io/${{ github.repository_owner }}/claude-sandbox
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
@@ -72,7 +72,7 @@ jobs:
             ## Docker Image
 
             ```bash
-            docker pull ghcr.io/${{ github.repository }}:${{ needs.docker.outputs.version }}
+            docker pull ghcr.io/${{ github.repository_owner }}/claude-sandbox:${{ needs.docker.outputs.version }}
             ```
 
             **Digest:** `${{ needs.docker.outputs.digest }}`

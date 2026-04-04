@@ -68,23 +68,37 @@ GIT_USER_EMAIL="you@example.com"
 
 ### 5. Build
 
+The recommended setup pulls the pre-built public image from GHCR and builds your private plugins on top. Set these in your `.env`:
+
 ```bash
-docker compose build
+BUILD_TARGET=private
+BASE_IMAGE=ghcr.io/matuscvengros/claude-sandbox:latest
 ```
 
-This builds the `base` target — system packages, Claude CLI, and official plugins. Ready to use out of the box.
-
-To include private plugins, build the `private` target and ensure your SSH keys are loaded in `ssh-add` (see [Private plugins](#private-plugins)):
+Then build:
 
 ```bash
-BUILD_TARGET=private docker compose build
+docker compose build --pull
+```
+
+This pulls the latest public image (rebuilt nightly by CI) and layers your private plugins on top. The `--pull` flag ensures Docker checks GHCR for a newer image.
+
+**Alternative: full local build**
+
+To build everything from scratch locally (no GHCR dependency):
+
+```bash
+# Base only (public plugins)
+BASE_IMAGE=base docker compose build
+
+# Base + private plugins
+BASE_IMAGE=base BUILD_TARGET=private docker compose build
 ```
 
 To rebuild from scratch (no cache):
 
 ```bash
-docker compose build --no-cache                    # base
-BUILD_TARGET=private docker compose build --no-cache # private
+docker compose build --no-cache
 ```
 
 ## Shell function
@@ -118,9 +132,12 @@ From any project directory:
 ```bash
 cd ~/my-project
 
-cc                            # interactive, persistent state
+cc                            # build + run, persistent state
 cc -- -p "build a REST API"   # prompt mode, persistent state
 cc -- --model sonnet          # override default model
+
+cc --no-build                 # skip build, use existing image
+cc --no-build -is             # isolated, skip build
 
 cc -is                        # interactive, isolated (no host state)
 cc --isolated -- -p "task"    # prompt mode, isolated
@@ -131,7 +148,7 @@ cc --bash                     # same thing
 cc -h                         # show help
 ```
 
-**`cc`** (default) mounts Claude's persistent state (`.claude`, `.claude.json`, `.config`) from the `agents` directory into the container, preserving conversation history, project memory, and plugin state across runs. Runs with `--dangerously-skip-permissions`.
+**`cc`** (default) pulls the latest base image, rebuilds if needed, then mounts Claude's persistent state (`.claude`, `.claude.json`, `.config`) from the `agents` directory into the container, preserving conversation history, project memory, and plugin state across runs. Runs with `--dangerously-skip-permissions`. Use `--no-build` to skip the build step.
 
 **`cc --isolated`** gives you a clean, disposable sandbox — Claude starts fresh with no memory of previous sessions.
 
@@ -238,8 +255,10 @@ The Dockerfile uses two build stages:
 
 | Target | Contents | Used by |
 |--------|----------|---------|
-| `base` | System packages, Claude CLI, official plugins | `docker compose build` (default) |
+| `base` | System packages, Claude CLI, official plugins | `docker compose build` |
 | `private` | Everything in `base` + private plugins via SSH | `BUILD_TARGET=private docker compose build` |
+
+When `BASE_IMAGE` is set to a GHCR image (see `.env.example`), the `private` target pulls the pre-built public image instead of building the `base` stage locally.
 
 To add private plugins, copy the example and add your plugin commands:
 
@@ -274,6 +293,8 @@ Both standalone and DevContainer modes use the same mount layout.
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `CLAUDE_CODE_OAUTH_TOKEN` | Yes | OAuth token for Claude CLI authentication |
+| `BUILD_TARGET` | No | Build target: `base` (default) or `private` |
+| `BASE_IMAGE` | No | Base image for `private` target: `base` (local, default) or GHCR image URL |
 | `GITHUB_TOKEN` | No | Token for GitHub CLI (`gh`) commands |
 | `GITHUB_PERSONAL_ACCESS_TOKEN` | No | Token for the GitHub MCP plugin |
 | `GIT_USER_NAME` | No | Git committer name |
@@ -286,12 +307,20 @@ Both standalone and DevContainer modes use the same mount layout.
 
 Runs on every push and pull request to `main`. Builds the `base` target with Docker Buildx and GitHub Actions cache.
 
+### Publish workflow
+
+Runs nightly at midnight AEST (14:00 UTC) and on manual trigger. Builds the `base` target for `linux/amd64` and `linux/arm64`, and pushes to GHCR with the `latest` tag. This keeps the public image up to date with the latest Claude Code CLI version.
+
+```bash
+docker pull ghcr.io/matuscvengros/claude-sandbox:latest
+```
+
 ### Release workflow
 
 Triggered by version tags (`v*`). Builds multi-platform images (`linux/amd64`, `linux/arm64`) and pushes to GHCR:
 
 ```bash
-docker pull ghcr.io/matuscvengros/claude-docker-sandbox:<version>
+docker pull ghcr.io/matuscvengros/claude-sandbox:<version>
 ```
 
 A GitHub Release with auto-generated release notes is created alongside the image.
