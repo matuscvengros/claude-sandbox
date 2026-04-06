@@ -1,8 +1,10 @@
 # Docker Sandbox for Claude Code
 
-[![Docker](https://img.shields.io/badge/Docker-node%3A24-blue?logo=docker)](https://hub.docker.com/_/node)
 [![Build](https://github.com/matuscvengros/claude-docker-sandbox/actions/workflows/build.yml/badge.svg)](https://github.com/matuscvengros/claude-docker-sandbox/actions/workflows/build.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Release](https://github.com/matuscvengros/claude-docker-sandbox/actions/workflows/release.yml/badge.svg)](https://github.com/matuscvengros/claude-docker-sandbox/actions/workflows/release.yml)
+[![Docker](https://img.shields.io/docker/v/ghcr.io/matuscvengros/claude-sandbox?sort=semver&label=docker&logo=docker)](https://ghcr.io/matuscvengros/claude-sandbox)
+[![Platform](https://img.shields.io/badge/platform-linux%2Famd64%20%7C%20linux%2Farm64-lightgrey?logo=linux)](https://ghcr.io/matuscvengros/claude-sandbox)
+[![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
 Docker container for running Claude Code autonomously in an isolated sandbox. Based on `node:24` (Debian Bookworm). Built for macOS hosts using OrbStack where Docker Sandbox isn't available.
 
