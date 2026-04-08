@@ -11,7 +11,8 @@ Docker container for running Claude Code autonomously in an isolated sandbox. Ba
 ## Pre-installed tools
 
 - Node.js 24 (LTS) + npm
-- Python 3 + pip + venv
+- Python 3 + pip + venv + uv, pytest, ruff, pint, scipy, numpy, pandas, matplotlib, requests, httpx, pydantic
+- Rust (stable) via rustup — rustc, cargo, rustfmt, clippy
 - C/C++ (gcc, g++, make, cmake, build-essential)
 - Git, GitHub CLI (`gh`), curl, wget, ripgrep, fd-find, jq, openssh-client
 - Starship prompt (Bracketed Segments preset)

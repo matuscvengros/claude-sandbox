@@ -33,6 +33,35 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # -- npm: Upgrade to Latest -------------------------------------------------
 RUN npm install -g npm@latest
 
+# -- Python Tools -----------------------------------------------------------
+## uv: fast Python package manager
+## pytest: testing framework
+## ruff: fast linter & formatter (replaces flake8, black, isort)
+## pyright: static type checker for Python
+## pint: physical units library
+## engunits: engineering units conversion library
+## scipy: scientific computing (optimization, linear algebra, signal processing)
+## numpy: numerical computing
+## pandas: data manipulation & analysis
+## matplotlib: plotting & visualization
+## requests: HTTP client
+## httpx: modern async HTTP client
+## pydantic: data validation using type hints
+RUN pip install --break-system-packages \
+    uv pytest ruff pyright pint engunits \
+    scipy numpy pandas matplotlib \
+    requests httpx pydantic
+
+# -- Rust Toolchain ---------------------------------------------------------
+## rustup: Rust toolchain installer (stable channel)
+## Includes: rustc, cargo, rustfmt, clippy
+ENV RUSTUP_HOME=/usr/local/rustup \
+    CARGO_HOME=/usr/local/cargo \
+    PATH="/usr/local/cargo/bin:${PATH}"
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+    | sh -s -- -y --default-toolchain stable --profile default \
+    && chmod -R a+w $RUSTUP_HOME $CARGO_HOME
+
 # -- Locale -----------------------------------------------------------------
 RUN sed -i '/en_US.UTF-8/s/^# //' /etc/locale.gen \
  && locale-gen en_US.UTF-8
