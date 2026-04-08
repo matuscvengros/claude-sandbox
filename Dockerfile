@@ -39,7 +39,6 @@ RUN npm install -g npm@latest
 ## ruff: fast linter & formatter (replaces flake8, black, isort)
 ## pyright: static type checker for Python
 ## pint: physical units library
-## engunits: engineering units conversion library
 ## scipy: scientific computing (optimization, linear algebra, signal processing)
 ## numpy: numerical computing
 ## pandas: data manipulation & analysis
@@ -48,7 +47,7 @@ RUN npm install -g npm@latest
 ## httpx: modern async HTTP client
 ## pydantic: data validation using type hints
 RUN pip install --break-system-packages \
-    uv pytest ruff pyright pint engunits \
+    uv pytest ruff pyright pint \
     scipy numpy pandas matplotlib \
     requests httpx pydantic
 
