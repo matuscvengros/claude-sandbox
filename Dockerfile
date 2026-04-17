@@ -26,6 +26,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     sudo locales socat \
     # Utilities \
     sox \
+    # Editors \
+    vim \
     && rm -rf /var/lib/apt/lists/*
 
 # -- Python 3.14 (from official image) -------------------------------------
