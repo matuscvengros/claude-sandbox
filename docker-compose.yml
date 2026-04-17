@@ -10,8 +10,8 @@ services:
     volumes:
       # R/W project workspace — 1:1 mirror of the caller's current directory
       - ${PWD}:${PWD}
-      # SSH agent forwarding (falls back to /dev/null if no agent on host)
-      - ${SSH_AUTH_SOCK:-/dev/null}:/ssh-agent:ro
+      # SSH agent forwarding via OrbStack/Docker Desktop's magic host-services socket
+      - /run/host-services/ssh-auth.sock:/ssh-agent
     stdin_open: true
     tty: true
     network_mode: bridge
