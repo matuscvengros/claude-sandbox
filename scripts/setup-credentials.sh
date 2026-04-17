@@ -10,7 +10,7 @@ if [ -n "$GIT_USER_EMAIL" ]; then
 fi
 
 # SSH: prefer forwarded agent, fall back to base64-encoded key
-if [ -S "$SSH_AUTH_SOCK" ] && sudo ssh-add -l &>/dev/null; then
+if [ -S "$SSH_AUTH_SOCK" ] && sudo SSH_AUTH_SOCK="$SSH_AUTH_SOCK" ssh-add -l &>/dev/null; then
   # Proxy the host socket via socat so the claude user can access it
   # without modifying permissions on the host's original socket
   PROXY_SOCK="/home/claude/.ssh/agent.sock"
