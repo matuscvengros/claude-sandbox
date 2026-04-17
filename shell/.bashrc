@@ -4,7 +4,7 @@
 #   cc -b,   --build            Build the image locally instead of pulling
 #   cc -bf,  --build-force      Build locally, bypassing the layer cache
 #   cc -is,  --isolated         Run Claude in ephemeral mode (no host state)
-#   cc -s,   --shell            Drop into a bash shell instead of Claude
+#   cc -sh,   --shell           Drop into a bash shell instead of Claude
 #   cc -v,   --volume <path>    Mount a host path into ~/  (read-write)
 #   cc -rov, --read-only-volume Mount a host path into ~/  (read-only)
 cc() {
@@ -24,7 +24,7 @@ cc() {
                 echo "  -b,   --build                    Build the image locally instead of pulling from GHCR"
                 echo "  -bf,  --build-force              Build locally, bypassing the layer cache (--no-cache)"
                 echo "  -is,  --isolated                 Run Claude in ephemeral mode (no host state)"
-                echo "  -s,   --shell                    Drop into a bash shell instead of Claude"
+                echo "  -sh,   --shell                   Drop into a bash shell instead of Claude"
                 echo "  -v,   --volume <path>            Mount a host path into ~/ (read-write)"
                 echo "  -rov, --read-only-volume <path>  Mount a host path into ~/ (read-only)"
                 echo ""
@@ -48,8 +48,12 @@ cc() {
                 build_no_cache=true
                 compose+=(-f "$DOCKER_SANDBOX_DIR/docker-compose.build.yml")
                 shift ;;
-            -is|--isolated) mode="isolated"; shift ;;
-            -s|--shell)     mode="shell";    shift ;;
+            -is|--isolated)
+                mode="isolated";
+                shift ;;
+            -sh|--shell)
+                mode="shell";
+                shift ;;
             -v|--volume)
                 shift
                 if [[ -z "$1" ]]; then echo "Error: -v/--volume requires a path argument" >&2; return 1; fi
@@ -62,8 +66,11 @@ cc() {
                 vol_path="$(realpath "$1" 2>/dev/null)" || { echo "Error: path not found: $1" >&2; return 1; }
                 extra_vols+=(-v "$vol_path:/home/claude/$(basename "$vol_path"):ro")
                 shift ;;
-            --)             shift; break ;;
-            *)              break ;;
+            --)
+                shift;
+                break ;;
+            *)
+                break ;;
         esac
     done
 

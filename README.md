@@ -138,7 +138,7 @@ cc -rov ~/config              # mount ~/config as read-only
 cc -v ~/a -rov ~/b            # multiple extra volumes
 cc -v ~/dir1/dir2/dir3        # mounts as ~/dir3 (basename only)
 
-cc -s                         # drop into a bash shell
+cc -sh                        # drop into a bash shell
 cc --shell                    # same thing
 
 cc -h                         # show help
