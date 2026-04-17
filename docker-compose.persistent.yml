@@ -1,0 +1,11 @@
+# Overlay that swaps the pulled GHCR image for a locally built one.
+# Used with: docker compose -f docker-compose.yml -f docker-compose.build.yml ...
+# Invoked by `cc -b` / `cc --build`.
+services:
+  claude-sandbox:
+    image: claude-sandbox
+    volumes:
+      - "$HOME/.claude:/home/claude/.claude"
+      - "$HOME/.claude.json:/home/claude/.claude.json"
+      - "$HOME/.config/git:/home/claude/.config/git"
+      - "$HOME/.config/gh:/home/claude/.config/gh"

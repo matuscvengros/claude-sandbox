@@ -8,7 +8,7 @@
 #   cc -rov, --read-only-volume Mount a host path into ~/  (read-only)
 cc() {
     local -a compose=(docker compose -f "$DOCKER_SANDBOX_DIR/docker-compose.yml")
-    local do_build=false
+    local local_build=false
     local mode="persistent"
     local -a extra_vols=()
     local vol_path
@@ -36,7 +36,7 @@ cc() {
                 return 0
                 ;;
             -b|--build)
-                do_build=true
+                local_build=true
                 compose+=(-f "$DOCKER_SANDBOX_DIR/docker-compose.build.yml")
                 shift ;;
             -is|--isolated) mode="isolated"; shift ;;
@@ -58,7 +58,7 @@ cc() {
         esac
     done
 
-    if $do_build; then
+    if $local_build; then
         "${compose[@]}" build || return 1
     fi
 
@@ -74,10 +74,8 @@ cc() {
                 claude-sandbox "$@"
             ;;
         persistent)
+            compose+=(-f "$DOCKER_SANDBOX_DIR/docker-compose.persistent.yml")
             "${compose[@]}" run --rm \
-                -v "$HOME/.claude:/home/claude/.claude" \
-                -v "$HOME/.claude.json:/home/claude/.claude.json" \
-                -v "$HOME/.config:/home/claude/.config" \
                 "${extra_vols[@]}" \
                 claude-sandbox \
                 claude --dangerously-skip-permissions "$@"
