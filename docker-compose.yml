@@ -1,22 +1,15 @@
 name: claude-sandbox
 services:
   claude-sandbox:
-    image: claude-sandbox
+    image: ghcr.io/matuscvengros/claude-sandbox:latest
     user: claude
-    build:
-      context: .
-      target: ${BUILD_TARGET:-base}
-      args:
-        BASE_IMAGE: ${BASE_IMAGE:-base}
-      ssh:
-        - default
     env_file: .env
-    working_dir: /home/claude/${PROJECT_NAME:-project}
+    working_dir: ${PWD}
     environment:
       - SSH_AUTH_SOCK=/ssh-agent
     volumes:
-      # R/W project workspace — mounts caller's current directory into /home/claude/<folder-name>
-      - ${PWD}:/home/claude/${PROJECT_NAME:-project}
+      # R/W project workspace — 1:1 mirror of the caller's current directory
+      - ${PWD}:${PWD}
       # SSH agent forwarding (falls back to /dev/null if no agent on host)
       - ${SSH_AUTH_SOCK:-/dev/null}:/ssh-agent:ro
     stdin_open: true

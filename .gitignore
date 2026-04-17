@@ -3,6 +3,3 @@ CLAUDE.md
 .claude
 .env
 .credentials.json
-
-# Private Build Files
-private/claude-plugins.sh

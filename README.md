@@ -69,63 +69,45 @@ GIT_USER_NAME="Your Name"
 GIT_USER_EMAIL="you@example.com"
 ```
 
-### 5. Build
+### 5. Image source
 
-The recommended setup pulls the pre-built public image from GHCR and builds your private plugins on top. Set `BASE_IMAGE` in your `.env`:
-
-```bash
-BASE_IMAGE=ghcr.io/matuscvengros/claude-sandbox:latest
-```
-
-Then build:
+The sandbox defaults to pulling the nightly-published image from GHCR — no build step required:
 
 ```bash
-# Base only (default)
-docker compose build --pull
-
-# Base + private plugins
-BUILD_TARGET=private docker compose build --pull
+docker compose pull
 ```
 
-The `--pull` flag ensures Docker checks GHCR for a newer image. When using the `cc` shell function, `--pull` is included automatically.
+That's it. `cc` will `docker compose run` against the pulled image on every invocation.
 
-**Alternative: full local build**
+**Alternative: local build**
 
-To build everything from scratch locally (no GHCR dependency):
+To build the image from the Dockerfile instead, use the build overlay:
 
 ```bash
-# Base only (public plugins)
-BASE_IMAGE=base docker compose build
-
-# Base + private plugins
-BASE_IMAGE=base BUILD_TARGET=private docker compose build
+docker compose -f docker-compose.yml -f docker-compose.build.yml build
 ```
+
+Or let the `cc` helper do it via `cc -b` / `cc --build`. A local build tags the image as `claude-sandbox` and leaves the pulled GHCR image untouched.
 
 To rebuild from scratch (no cache):
 
 ```bash
-docker compose build --no-cache
+docker compose -f docker-compose.yml -f docker-compose.build.yml build --no-cache
 ```
 
 ## Shell function
 
-The `cc` function lets you launch the sandbox from any project directory. In persistent mode, it mounts Claude's state from a dedicated `agents` directory to keep it separate from your own config — this avoids polluting your home environment with persistent files from the container. If you'd rather share your own `~/.claude` config directly, you can modify the mount paths, but keep in mind the two environments may diverge and aren't necessarily meant to be the same.
+The `cc` function lets you launch the sandbox from any project directory. In persistent mode, it mounts `~/.claude`, `~/.claude.json`, and `~/.config` from your home directory into the container so session history, plugins, settings, and tool configs are shared with your host Claude Code.
 
-### macOS
-
-Expects a `/Users/agents` directory for persistent state (`sudo mkdir -p /Users/agents && sudo chown $USER:staff /Users/agents`).
+### Setup (macOS or Linux)
 
 ```bash
+# zsh (macOS default)
 echo 'export DOCKER_SANDBOX_DIR="$HOME/path/to/claude-docker-sandbox"' >> ~/.zshrc
 cat shell/.zshrc >> ~/.zshrc
 source ~/.zshrc
-```
 
-### Linux
-
-Expects a `/home/agents` directory for persistent state (`sudo mkdir -p /home/agents && sudo chown $USER:$USER /home/agents`).
-
-```bash
+# bash (Linux default)
 echo 'export DOCKER_SANDBOX_DIR="$HOME/path/to/claude-docker-sandbox"' >> ~/.bashrc
 cat shell/.bashrc >> ~/.bashrc
 source ~/.bashrc
@@ -138,12 +120,12 @@ From any project directory:
 ```bash
 cd ~/my-project
 
-cc                            # build + run, persistent state
+cc                            # run with pulled GHCR image, persistent state
 cc -- -p "build a REST API"   # prompt mode, persistent state
 cc -- --model sonnet          # override default model
 
-cc --no-build                 # skip build, use existing image
-cc --no-build -is             # isolated, skip build
+cc -b                         # build image locally, then run
+cc --build -is                # build locally, isolated run
 
 cc -is                        # interactive, isolated (no host state)
 cc --isolated -- -p "task"    # prompt mode, isolated
@@ -159,7 +141,9 @@ cc --shell                    # same thing
 cc -h                         # show help
 ```
 
-**`cc`** (default) pulls the latest base image, rebuilds if needed, then mounts Claude's persistent state (`.claude`, `.claude.json`, `.config`) from the `agents` directory into the container, preserving conversation history, project memory, and plugin state across runs. Runs with `--dangerously-skip-permissions`. Use `--no-build` to skip the build step. Dangling images from previous builds are automatically cleaned up after each run.
+**`cc`** (default) uses the pulled GHCR image and mounts Claude's persistent state (`~/.claude`, `~/.claude.json`, `~/.config`) into the container, preserving conversation history, project memory, and plugin state across runs. Runs with `--dangerously-skip-permissions`.
+
+**`cc -b` / `cc --build`** builds the image locally from the Dockerfile before running. The local build is tagged `claude-sandbox` and doesn't affect the pulled GHCR image.
 
 **`cc --isolated`** gives you a clean, disposable sandbox — Claude starts fresh with no memory of previous sessions.
 
@@ -169,7 +153,7 @@ cc -h                         # show help
 
 **`cc -rov <path>`** / **`cc --read-only-volume <path>`** same as `-v` but the mount is read-only. Useful for reference data or configs Claude shouldn't modify.
 
-The current directory is automatically mounted into the container at `/home/claude/<folder-name>` (e.g., running from `~/my-project` mounts to `/home/claude/my-project`).
+The current directory is automatically mounted into the container at the same absolute path (e.g., running from `/Users/you/my-project` mounts to `/Users/you/my-project`). This preserves Claude's path-derived session keys across host and container.
 
 ## Usage
 
@@ -221,74 +205,45 @@ SSH_PRIVATE_KEY_B64=<base64-encoded-key>
 
 The key is decoded at container startup, written to `~/.ssh/id_ed25519` with `600` permissions, and available for git operations. Agent forwarding takes priority if both are configured.
 
-### SSH during build (private plugins)
-
-The `private` build target uses Docker BuildKit SSH forwarding to clone private plugin repositories. BuildKit mounts the host's SSH agent socket during the build — the key material never enters the image layers.
-
-This requires your SSH keys to be loaded in `ssh-add` on the host:
-
-```bash
-# Load your key (if not already loaded)
-ssh-add ~/.ssh/id_ed25519
-
-# Then build the private target
-BUILD_TARGET=private docker compose build
-```
-
-If you don't have keys in `ssh-add` and need to pull private repos during build, you'll need to add them first, or provide a specific key to the agent.
-
 ### Known hosts
 
 The file `ssh/known_hosts` contains GitHub's published SSH host keys (RSA, ECDSA, Ed25519). These are copied into the container at build time to prevent interactive "Are you sure you want to continue connecting?" prompts. The keys can be verified against [GitHub's published fingerprints](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints).
 
 If you need to connect to other SSH hosts (GitLab, Bitbucket, self-hosted), add their keys to `ssh/known_hosts` before building.
 
-## Private plugins
+## Extending with a private layer
 
-The Dockerfile uses two build stages:
+This repo is a plain public build. To add private plugins, private apt packages, or custom configs, create a **separate** repository that uses the published GHCR image as its base:
 
-| Target | Contents | Used by |
-|--------|----------|---------|
-| `base` | System packages, Claude CLI, official plugins | `docker compose build` |
-| `private` | Everything in `base` + private plugins via SSH | `BUILD_TARGET=private docker compose build` |
+```dockerfile
+# your-private-repo/Dockerfile
+FROM ghcr.io/matuscvengros/claude-sandbox:latest
 
-When `BASE_IMAGE` is set to a GHCR image (see `.env.example`), the `private` target pulls the pre-built public image instead of building the `base` stage locally.
-
-To add private plugins, copy the example and add your plugin commands:
-
-```bash
-cp private/claude-plugins.sh.example private/claude-plugins.sh
+# Add your private plugins, tools, config, etc.
+RUN --mount=type=ssh \
+    claude plugin marketplace add git@github.com:your-org/your-plugins.git \
+    && claude plugin install your-plugin@your-plugins
 ```
 
-Edit `private/claude-plugins.sh` to install your plugins:
-
-```bash
-#!/bin/bash
-set -e
-export SSH_AUTH_SOCK=$(ls /run/buildkit/ssh_agent.* 2>/dev/null | head -1)
-
-claude plugin marketplace add git@github.com:your-org/your-plugins.git
-claude plugin install your-plugin@your-plugins
-```
-
-The script runs during the `private` build stage with the host's SSH agent forwarded, allowing access to private repositories.
+That repo can tag its image as `claude-sandbox` locally (matching the name the `cc` helper expects) or give it any other tag and point `image:` in `docker-compose.yml` at it.
 
 ## Mount layout
 
 | Container path | Host source | Access | Purpose |
 |---------------|-------------|--------|---------|
-| `/home/claude/<folder-name>` | Caller's `$PWD` | Read/Write | Project workspace |
+| `${PWD}` (same absolute path) | Caller's `$PWD` | Read/Write | Project workspace (1:1 mirror) |
 | `/ssh-agent` | Host's `$SSH_AUTH_SOCK` | Read-only | SSH agent forwarding |
+| `/home/claude/.claude` | `$HOME/.claude` | Read/Write | Claude state (persistent mode only) |
+| `/home/claude/.claude.json` | `$HOME/.claude.json` | Read/Write | Claude config (persistent mode only) |
+| `/home/claude/.config` | `$HOME/.config` | Read/Write | Tool configs (persistent mode only) |
 
-The current directory is mounted into the container at `/home/claude/<folder-name>`.
+The current directory is mounted into the container at the **same absolute path** it has on the host (1:1 mirror). This preserves Claude's per-project session keys (`~/.claude/projects/<path-encoded>`) across host and container.
 
 ## Environment variables
 
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `CLAUDE_CODE_OAUTH_TOKEN` | Yes | OAuth token for Claude CLI authentication |
-| `BASE_IMAGE` | No | Base image for `private` target: `base` (local, default) or GHCR image URL |
-| `BUILD_TARGET` | No | Build target: `base` (default) or `private` (set inline, not in `.env`) |
 | `GITHUB_TOKEN` | No | Token for GitHub CLI (`gh`) commands |
 | `GITHUB_PERSONAL_ACCESS_TOKEN` | No | Token for the GitHub MCP plugin |
 | `GIT_USER_NAME` | No | Git committer name |
@@ -299,11 +254,11 @@ The current directory is mounted into the container at `/home/claude/<folder-nam
 
 ### Build workflow
 
-Runs on every push and pull request to `main`. Builds the `base` target with Docker Buildx and GitHub Actions cache.
+Runs on every push and pull request to `main`. Builds the image with Docker Buildx and GitHub Actions cache.
 
 ### Publish workflow
 
-Runs nightly (14:00 UTC) and on manual trigger. Builds the `base` target for `linux/amd64` and `linux/arm64`, and pushes to GHCR with the `latest` tag. This keeps the public image up to date with the latest Claude Code CLI version.
+Runs nightly (14:00 UTC) and on manual trigger. Builds the image for `linux/amd64` and `linux/arm64`, and pushes to GHCR with the `latest` tag. This keeps the public image up to date with the latest Claude Code CLI version.
 
 ```bash
 docker pull ghcr.io/matuscvengros/claude-sandbox:latest

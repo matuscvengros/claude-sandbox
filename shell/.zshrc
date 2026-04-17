@@ -1,18 +1,15 @@
 # Claude Docker Sandbox Launcher
 # Usage: cc [options] [-- extra args passed to claude/container]
-#   cc                          Run Claude with persistent state
+#   cc                          Run Claude, pulled image, persistent state
+#   cc -b,   --build            Build the image locally instead of pulling
 #   cc -is,  --isolated         Run Claude in ephemeral mode (no host state)
 #   cc -s,   --shell            Drop into a bash shell instead of Claude
 #   cc -v,   --volume <path>    Mount a host path into ~/  (read-write)
 #   cc -rov, --read-only-volume Mount a host path into ~/  (read-only)
-#   cc       --no-build         Skip the build step (use existing image)
 cc() {
     local -a compose=(docker compose -f "$DOCKER_SANDBOX_DIR/docker-compose.yml")
-    local project_name
-    project_name="$(basename "$PWD")"
-
+    local do_build=false
     local mode="persistent"
-    local do_build=true
     local -a extra_vols=()
     local vol_path
     while [[ $# -gt 0 ]]; do
@@ -22,21 +19,28 @@ cc() {
                 echo ""
                 echo "Options:"
                 echo "  -h,   --help                     Show this help message"
+                echo "  -b,   --build                    Build the image locally instead of pulling from GHCR"
                 echo "  -is,  --isolated                 Run Claude in ephemeral mode (no host state)"
                 echo "  -s,   --shell                    Drop into a bash shell instead of Claude"
                 echo "  -v,   --volume <path>            Mount a host path into ~/ (read-write)"
                 echo "  -rov, --read-only-volume <path>  Mount a host path into ~/ (read-only)"
-                echo "        --no-build                 Skip the build step (use existing image)"
+                echo ""
+                echo "Image source:"
+                echo "  (default)   Pulled from ghcr.io/matuscvengros/claude-sandbox:latest"
+                echo "  --build     Built locally from the Dockerfile"
                 echo ""
                 echo "Modes:"
-                echo "  (default)   Run Claude with persistent state (~/.claude, ~/.config mounted)"
+                echo "  (default)   Persistent state — mounts ~/.claude, ~/.claude.json, ~/.config"
                 echo "  isolated    Ephemeral container, no state persisted to host"
                 echo "  shell       Shell access to the container (no Claude)"
                 return 0
                 ;;
+            -b|--build)
+                do_build=true
+                compose+=(-f "$DOCKER_SANDBOX_DIR/docker-compose.build.yml")
+                shift ;;
             -is|--isolated) mode="isolated"; shift ;;
             -s|--shell)     mode="shell";    shift ;;
-            --no-build)     do_build=false;  shift ;;
             -v|--volume)
                 shift
                 if [[ -z "$1" ]]; then echo "Error: -v/--volume requires a path argument" >&2; return 1; fi
@@ -54,33 +58,29 @@ cc() {
         esac
     done
 
-    # Build image (pulls latest base, rebuilds if needed)
     if $do_build; then
-        PROJECT_NAME="$project_name" "${compose[@]}" build --pull || return 1
+        "${compose[@]}" build || return 1
     fi
 
     case "$mode" in
         isolated)
-            PROJECT_NAME="$project_name" "${compose[@]}" run --rm \
+            "${compose[@]}" run --rm \
                 "${extra_vols[@]}" \
                 claude-sandbox claude --dangerously-skip-permissions "$@"
             ;;
         shell)
-            PROJECT_NAME="$project_name" "${compose[@]}" run --rm \
+            "${compose[@]}" run --rm \
                 "${extra_vols[@]}" \
                 claude-sandbox "$@"
             ;;
         persistent)
-            PROJECT_NAME="$project_name" "${compose[@]}" run --rm \
-                -v /Users/agents/.claude:/home/claude/.claude \
-                -v /Users/agents/.claude.json:/home/claude/.claude.json \
-                -v /Users/agents/.config:/home/claude/.config \
+            "${compose[@]}" run --rm \
+                -v "$HOME/.claude:/home/claude/.claude" \
+                -v "$HOME/.claude.json:/home/claude/.claude.json" \
+                -v "$HOME/.config:/home/claude/.config" \
                 "${extra_vols[@]}" \
                 claude-sandbox \
                 claude --dangerously-skip-permissions "$@"
             ;;
     esac
-
-    # Clean up dangling claude-sandbox images
-    docker image prune -f --filter "label=com.docker.compose.project=claude-sandbox" &>/dev/null
 }

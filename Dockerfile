@@ -1,17 +1,12 @@
-# Global ARG: controls which image the 'private' stage builds on.
-# - "base"               → build everything locally (default)
-# - "ghcr.io/user/repo"  → pull pre-built public image, skip local base build
-ARG BASE_IMAGE=base
-
 # ===========================================================================
-# Python 3.14 (copied into base via multi-stage)
+# Python 3.14 (copied into the final image via multi-stage)
 # ===========================================================================
 FROM python:3.14-bookworm AS python-src
 
 # ===========================================================================
-# Base Image
+# Main Image
 # ===========================================================================
-FROM node:24 AS base
+FROM node:24
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -170,19 +165,6 @@ COPY --chmod=755 --chown=claude:claude scripts/setup-credentials.sh /tmp/setup-c
 ## Trust
 COPY --chmod=755 --chown=claude:claude scripts/setup-claude-workdir-trust.sh /tmp/setup-claude-workdir-trust.sh
 
-WORKDIR /home/claude/project
+WORKDIR /home/claude
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["bash"]
-
-# ===========================================================================
-# Full: Base + Private Plugins
-# ===========================================================================
-FROM ${BASE_IMAGE} AS private
-
-# -- Private Plugins --------------------------------------------------------
-COPY --chmod=755 --chown=claude:claude private/claude-plugins.sh /tmp/claude-plugins.sh
-RUN --mount=type=ssh \
-    export SSH_AUTH_SOCK=$(ls /run/buildkit/ssh_agent.* 2>/dev/null | head -1) \
-    && sudo chmod 666 /run/buildkit/ssh_agent.* \
-    && bash /tmp/claude-plugins.sh \
-    && rm -f /tmp/claude-plugins.sh

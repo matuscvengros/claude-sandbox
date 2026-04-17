@@ -1,5 +1,0 @@
-#!/bin/bash
-set -e
-
-# claude plugin marketplace add <https or ssh github link / local folder>
-# claude plugin install <plugin>@<private-marketplace>
