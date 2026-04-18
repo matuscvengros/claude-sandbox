@@ -1,8 +1,8 @@
 # Docker Sandbox for Claude Code
 
-[![Build](https://github.com/matuscvengros/claude-docker-sandbox/actions/workflows/build.yml/badge.svg)](https://github.com/matuscvengros/claude-docker-sandbox/actions/workflows/build.yml)
-[![Release](https://github.com/matuscvengros/claude-docker-sandbox/actions/workflows/release.yml/badge.svg)](https://github.com/matuscvengros/claude-docker-sandbox/actions/workflows/release.yml)
-[![Nightly](https://github.com/matuscvengros/claude-docker-sandbox/actions/workflows/nightly.yml/badge.svg)](https://github.com/matuscvengros/claude-docker-sandbox/actions/workflows/nightly.yml)
+[![Build](https://github.com/matuscvengros/claude-sandbox/actions/workflows/build.yml/badge.svg)](https://github.com/matuscvengros/claude-sandbox/actions/workflows/build.yml)
+[![Release](https://github.com/matuscvengros/claude-sandbox/actions/workflows/release.yml/badge.svg)](https://github.com/matuscvengros/claude-sandbox/actions/workflows/release.yml)
+[![Nightly](https://github.com/matuscvengros/claude-sandbox/actions/workflows/nightly.yml/badge.svg)](https://github.com/matuscvengros/claude-sandbox/actions/workflows/nightly.yml)
 [![Docker](https://img.shields.io/badge/docker-node%3A24--bookworm-blue?logo=docker)](https://hub.docker.com/_/node)
 [![Platform](https://img.shields.io/badge/platform-linux%2Famd64%20%7C%20linux%2Farm64-lightgrey?logo=linux)](https://ghcr.io/matuscvengros/claude-sandbox)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -100,7 +100,7 @@ Or via the helper: `cc -bf` / `cc --build-force`.
 
 ## Shell function
 
-The `cc` function lets you launch the sandbox from any project directory. In persistent mode, it mounts `~/.claude`, `~/.claude.json`, and `~/.config` from your home directory into the container so session history, plugins, settings, and tool configs are shared with your host Claude Code.
+The `cc` function lets you launch the sandbox from any project directory. In persistent mode, it mounts `~/.claude`, `~/.claude.json`, `~/.config/git`, and `~/.config/gh` from your home directory into the container so session history, plugins, settings, and tool configs are shared with your host Claude Code.
 
 ### Setup (macOS or Linux)
 
@@ -145,7 +145,7 @@ cc --shell                    # same thing
 cc -h                         # show help
 ```
 
-**`cc`** (default) uses the pulled GHCR image and mounts Claude's persistent state (`~/.claude`, `~/.claude.json`, `~/.config`) into the container, preserving conversation history, project memory, and plugin state across runs. Runs with `--dangerously-skip-permissions`.
+**`cc`** (default) uses the pulled GHCR image and mounts Claude's persistent state (`~/.claude`, `~/.claude.json`, `~/.config/git`, `~/.config/gh`) into the container, preserving conversation history, project memory, and plugin state across runs. Runs with `--dangerously-skip-permissions`.
 
 **`cc -b` / `cc --build`** builds the image locally from the Dockerfile before running. The local build is tagged `claude-sandbox` and doesn't affect the pulled GHCR image.
 
@@ -241,7 +241,8 @@ That repo can tag its image as `claude-sandbox` locally (matching the name the `
 | `/ssh-agent` | Host's `$SSH_AUTH_SOCK` | Read-only | SSH agent forwarding |
 | `/home/claude/.claude` | `$HOME/.claude` | Read/Write | Claude state (persistent mode only) |
 | `/home/claude/.claude.json` | `$HOME/.claude.json` | Read/Write | Claude config (persistent mode only) |
-| `/home/claude/.config` | `$HOME/.config` | Read/Write | Tool configs (persistent mode only) |
+| `/home/claude/.config/git` | `$HOME/.config/git` | Read/Write | Git config (persistent mode only) |
+| `/home/claude/.config/gh` | `$HOME/.config/gh` | Read/Write | GitHub CLI config (persistent mode only) |
 
 The current directory is mounted into the container at the **same absolute path** it has on the host (1:1 mirror). This preserves Claude's per-project session keys (`~/.claude/projects/<path-encoded>`) across host and container.
 

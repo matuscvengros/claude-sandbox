@@ -34,7 +34,7 @@ cc() {
                 echo "  --build-force   Built locally with --no-cache"
                 echo ""
                 echo "Modes:"
-                echo "  (default)   Persistent state — mounts ~/.claude, ~/.claude.json, ~/.config"
+                echo "  (default)   Persistent state — mounts ~/.claude, ~/.claude.json, ~/.config/git, ~/.config/gh"
                 echo "  isolated    Ephemeral container, no state persisted to host"
                 echo "  shell       Shell access to the container (no Claude)"
                 return 0

@@ -34,7 +34,7 @@ cc() {
                 echo "  --build-force   Built locally with --no-cache"
                 echo ""
                 echo "Modes:"
-                echo "  (default)   Persistent state — mounts ~/.claude, ~/.claude.json, ~/.config"
+                echo "  (default)   Persistent state — mounts ~/.claude, ~/.claude.json, ~/.config/git, ~/.config/gh"
                 echo "  isolated    Ephemeral container, no state persisted to host"
                 echo "  shell       Shell access to the container (no Claude)"
                 return 0
@@ -94,11 +94,8 @@ cc() {
                 claude-sandbox "$@"
             ;;
         persistent)
+            compose+=(-f "$DOCKER_SANDBOX_DIR/docker-compose.persistent.yml")
             "${compose[@]}" run --rm \
-                -v "$HOME/.claude:/home/claude/.claude" \
-                -v "$HOME/.claude.json:/home/claude/.claude.json" \
-                -v "$HOME/.config/git:/home/claude/.config/git" \
-                -v "$HOME/.config/gh:/home/claude/.config/gh" \
                 "${extra_vols[@]}" \
                 claude-sandbox \
                 claude --dangerously-skip-permissions "$@"

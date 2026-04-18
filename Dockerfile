@@ -48,7 +48,7 @@ RUN npm install -g npm@latest
 
 # -- TypeScript LSP ------------------------------------------------------------
 ## typescript-language-server: LSP wrapper for tsserver
-RUN sudo npm install -g typescript-language-server
+RUN npm install -g typescript-language-server
 
 # -- Python Tools -----------------------------------------------------------
 ## uv: fast Python package manager
@@ -91,7 +91,8 @@ RUN userdel -r node \
     && useradd -m -s /bin/bash -u 1000 claude \
     && mkdir -p /home/claude/.config /home/claude/.local/bin /home/claude/.ssh /home/claude/.claude \
     && chmod 700 /home/claude/.ssh \
-    && echo "claude ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/claude
+    && echo "claude ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/claude \
+    && chmod 0440 /etc/sudoers.d/claude
 
 # -- SSH --------------------------------------------------------------------
 COPY --chmod=644 ssh/known_hosts /home/claude/.ssh/known_hosts

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Shared credential setup — sourced by entrypoint.sh and post-start.sh
+# Shared credential setup — sourced by entrypoint.sh
 
 # Configure git identity from env vars
 if [ -n "$GIT_USER_NAME" ]; then
