@@ -4,7 +4,7 @@
 #   cc -b,   --build            Build the image locally instead of pulling
 #   cc -bf,  --build-force      Build locally, bypassing the layer cache
 #   cc -is,  --isolated         Run Claude in ephemeral mode (no host state)
-#   cc -sh,   --shell           Drop into a bash shell instead of Claude
+#   cc -sh,  --shell            Drop into a bash shell instead of Claude
 #   cc -v,   --volume <path>    Mount a host path into ~/  (read-write)
 #   cc -rov, --read-only-volume Mount a host path into ~/  (read-only)
 cc() {
@@ -24,7 +24,7 @@ cc() {
                 echo "  -b,   --build                    Build the image locally instead of pulling from GHCR"
                 echo "  -bf,  --build-force              Build locally, bypassing the layer cache (--no-cache)"
                 echo "  -is,  --isolated                 Run Claude in ephemeral mode (no host state)"
-                echo "  -sh,   --shell                   Drop into a bash shell instead of Claude"
+                echo "  -sh,  --shell                    Drop into a bash shell instead of Claude"
                 echo "  -v,   --volume <path>            Mount a host path into ~/ (read-write)"
                 echo "  -rov, --read-only-volume <path>  Mount a host path into ~/ (read-only)"
                 echo ""
