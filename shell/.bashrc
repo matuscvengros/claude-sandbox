@@ -106,6 +106,5 @@ cc() {
     esac
 
     # Clean up dangling claude-sandbox images
-    docker image prune -f --filter "label=com.docker.compose.project=claude-sandbox" &>/dev/null
-    docker image prune -f --filter "label=org.opencontainers.image.source=https://github.com/matuscvengros/claude-sandbox" &>/dev/null
+    docker image prune -f --filter "label=org.opencontainers.image.title=claude-sandbox" &>/dev/null
 }

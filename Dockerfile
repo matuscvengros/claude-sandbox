@@ -8,6 +8,8 @@ FROM python:3.14-bookworm AS python-src
 # ===========================================================================
 FROM node:24
 
+LABEL org.opencontainers.image.title="claude-sandbox"
+
 ARG DEBIAN_FRONTEND=noninteractive
 
 # ===========================================================================
