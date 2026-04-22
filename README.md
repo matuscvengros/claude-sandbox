@@ -18,7 +18,11 @@ Docker container for running Claude Code autonomously in an isolated sandbox. Ba
 - Git, GitHub CLI (`gh`), curl, wget, ripgrep, fd-find, jq, openssh-client
 - Starship prompt (Bracketed Segments preset)
 - Firecrawl CLI (`firecrawl-cli`)
-- Claude Code CLI with official plugins (see [Plugins](#plugins))
+- AI coding agents (all installed as npm globals under the `claude` user):
+  - **Claude Code** (`@anthropic-ai/claude-code`) — with official plugins, see [Plugins](#plugins)
+  - **OpenAI Codex** (`@openai/codex`)
+  - **SST opencode** (`opencode-ai`)
+  - **Pi Coding Agent** (`@mariozechner/pi-coding-agent`) — minimal terminal coding harness supporting 15+ LLMs
 
 ## Plugins
 
@@ -49,7 +53,7 @@ Set `CLAUDE_CODE_OAUTH_TOKEN` in your `.env` file. Claude CLI picks this up auto
 CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-...
 ```
 
-You can get a token by running `claude set-token` on your host machine.
+You can get a token by running `claude setup-token` on your host machine.
 
 ### 3. Configure GitHub tokens (optional)
 

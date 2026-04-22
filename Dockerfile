@@ -96,7 +96,7 @@ RUN pip install \
 ## Create claude user (UID 1000). The python:3.14-bookworm base ships no
 ## non-root user, so UID 1000 is free.
 RUN useradd -m -s /bin/bash -u 1000 claude \
-    && mkdir -p /home/claude/.config /home/claude/.local/bin /home/claude/.ssh /home/claude/.claude \
+    && mkdir -p /home/claude/.config /home/claude/.ssh /home/claude/.claude \
     && chmod 700 /home/claude/.ssh \
     && echo "claude ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/claude \
     && chmod 0440 /etc/sudoers.d/claude
@@ -117,29 +117,42 @@ RUN chown -R claude:claude /home/claude
 # ===========================================================================
 USER claude
 
+# -- Per-user npm prefix ----------------------------------------------------
+## Install npm globals under /home/claude/.npm-global so each AI-agent CLI
+## below can be installed as `claude` without sudo. Binaries land in
+## ~/.npm-global/bin which we prepend to PATH.
+##
+## Note: ENV is image-wide, not USER-scoped. These vars persist to runtime
+## and to any future `USER root` layer below, so a subsequent root-level
+## `npm install -g` would also target /home/claude/.npm-global unless it
+## overrides NPM_CONFIG_PREFIX inline.
+ENV NPM_CONFIG_PREFIX=/home/claude/.npm-global \
+    PATH="/home/claude/.npm-global/bin:${PATH}"
+
 # -- Shell: Starship Prompt -------------------------------------------------
 RUN curl -sS https://starship.rs/install.sh | sh -s -- -y \
     && starship preset bracketed-segments -o /home/claude/.config/starship.toml \
     && echo 'eval "$(starship init bash)"' >> /home/claude/.bashrc
 
-# -- Claude Code: Install ---------------------------------------------------
-ENV PATH="/home/claude/.local/bin:${PATH}"
-RUN curl -fsSL https://claude.ai/install.sh | bash
+# -- Claude Code -----------------------------------------------------------
 
-# -- Claude Code: Onboarding State ------------------------------------------
-## Seeds onboarding/marketplace flags so `claude plugin install` below runs
-## non-interactively. Must come before plugin installs, because those mutate
-## this same file.
+## -- Install --
+RUN npm install -g @anthropic-ai/claude-code
+
+## -- Onboarding State --
+### Seeds onboarding/marketplace flags so `claude plugin install` below runs
+### non-interactively. Must come before plugin installs, because those mutate
+### this same file.
 COPY --chown=claude:claude claude/.claude.json /home/claude/.claude.json
 
-# -- Claude Code: Plugins ---------------------------------------------------
-## QOL
+## -- Plugins --
+### QOL
 RUN npx claude-statusline-atomic@latest install
 
-## Official Marketplace
+### Official Marketplace
 RUN claude plugin marketplace add anthropics/claude-plugins-official
 
-## Claude Workflow & Configuration
+### Claude Workflow & Configuration
 RUN claude plugin install superpowers@claude-plugins-official \
     && claude plugin install claude-md-management@claude-plugins-official \
     && claude plugin install claude-code-setup@claude-plugins-official \
@@ -148,12 +161,12 @@ RUN claude plugin install superpowers@claude-plugins-official \
     && claude plugin install commit-commands@claude-plugins-official \
     && claude plugin install hookify@claude-plugins-official \
     && claude plugin install security-guidance@claude-plugins-official \
-    ## Plugin & Skill Development
+    ### Plugin & Skill Development
     && claude plugin install agent-sdk-dev@claude-plugins-official \
     && claude plugin install mcp-server-dev@claude-plugins-official \
     && claude plugin install plugin-dev@claude-plugins-official \
     && claude plugin install skill-creator@claude-plugins-official \
-    ## Code Quality & Development
+    ### Code Quality & Development
     && claude plugin install code-review@claude-plugins-official \
     && claude plugin install code-simplifier@claude-plugins-official \
     && claude plugin install pr-review-toolkit@claude-plugins-official \
@@ -162,16 +175,28 @@ RUN claude plugin install superpowers@claude-plugins-official \
     && claude plugin install typescript-lsp@claude-plugins-official \
     && claude plugin install clangd-lsp@claude-plugins-official \
     && claude plugin install frontend-design@claude-plugins-official \
-    ## External Tools & Integrations
+    ### External Tools & Integrations
     && claude plugin install firecrawl@claude-plugins-official \
     && claude plugin install playwright@claude-plugins-official \
     && claude plugin install context7@claude-plugins-official \
     && claude plugin install github@claude-plugins-official
 
-# -- Claude Code: Runtime Settings ------------------------------------------
-## Placed after the plugin-install layer so edits to model/permissions
-## don't invalidate the expensive plugin layer above.
+## -- Runtime Settings --
+### Placed after the plugin-install layer so edits to model/permissions
+### don't invalidate the expensive plugin layer above.
 COPY --chown=claude:claude claude/settings.json /home/claude/.claude/settings.json
+
+# -- Codex -----------------------------------------------------------------
+## OpenAI Codex: AI coding agent CLI
+RUN npm install -g @openai/codex
+
+# -- OpenCode --------------------------------------------------------------
+## SST opencode: open-source AI coding agent
+RUN npm install -g opencode-ai
+
+# -- Pi --------------------------------------------------------------------
+## Pi Coding Agent: minimal terminal coding harness supporting 15+ LLM providers
+RUN npm install -g @mariozechner/pi-coding-agent
 
 # ===========================================================================
 # Finalize
