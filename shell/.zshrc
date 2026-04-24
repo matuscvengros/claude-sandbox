@@ -1,6 +1,6 @@
-# Claude Docker Sandbox Launchers
+# Agent Sandbox Launchers
 #
-# Launch one of four AI-agent CLIs inside the claude-sandbox container:
+# Launch one of four AI-agent CLIs inside the agent-sandbox container:
 #   cc   Claude Code        (claude --dangerously-skip-permissions)
 #   oc   OpenCode           (opencode)
 #   cx   OpenAI Codex       (codex)
@@ -13,7 +13,7 @@
 # ---------------------------------------------------------------------------
 _sandbox_help() {
     cat <<'EOF'
-Launches an AI-agent CLI inside the claude-sandbox Docker container.
+Launches an AI-agent CLI inside the agent-sandbox Docker container.
 Available agents: cc (Claude Code), oc (OpenCode), cx (Codex), pi (Pi
 Coding Agent). All accept the same flags.
 
@@ -29,7 +29,7 @@ Options:
   -rov, --read-only-volume <path>  Mount a host path into ~/ (read-only)
 
 Image source:
-  (default)       Pulled from ghcr.io/matuscvengros/claude-sandbox:latest
+  (default)       Pulled from ghcr.io/matuscvengros/agent-sandbox:latest
   --build         Built locally from the Dockerfile
   --build-force   Built locally with --no-cache
 
@@ -102,31 +102,31 @@ _sandbox_run() {
         $build_no_cache && build_args+=(--no-cache)
         "${compose[@]}" "${build_args[@]}" || return 1
     else
-        "${compose[@]}" pull claude-sandbox || echo "claude-sandbox: image pull failed, using local copy" >&2
+        "${compose[@]}" pull agent-sandbox || echo "agent-sandbox: image pull failed, using local copy" >&2
     fi
 
     case "$mode" in
         isolated)
             "${compose[@]}" run --rm \
                 "${extra_vols[@]}" \
-                claude-sandbox "${agent_command[@]}" "$@"
+                agent-sandbox "${agent_command[@]}" "$@"
             ;;
         shell)
             "${compose[@]}" run --rm \
                 "${extra_vols[@]}" \
-                claude-sandbox "$@"
+                agent-sandbox "$@"
             ;;
         persistent)
             compose+=(-f "$DOCKER_SANDBOX_DIR/docker-compose.persistent.yml")
             "${compose[@]}" run --rm \
                 "${extra_vols[@]}" \
-                claude-sandbox \
+                agent-sandbox \
                 "${agent_command[@]}" "$@"
             ;;
     esac
 
-    # Clean up dangling claude-sandbox images
-    docker image prune -f --filter "label=org.opencontainers.image.title=claude-sandbox" &>/dev/null
+    # Clean up dangling agent-sandbox images
+    docker image prune -f --filter "label=org.opencontainers.image.title=agent-sandbox" &>/dev/null
 }
 
 # ---------------------------------------------------------------------------

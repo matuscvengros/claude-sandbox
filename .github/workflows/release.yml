@@ -13,7 +13,7 @@ permissions:
   packages: write
 
 env:
-  IMAGE: ghcr.io/${{ github.repository_owner }}/claude-sandbox
+  IMAGE: ghcr.io/${{ github.repository_owner }}/agent-sandbox
 
 jobs:
   build:
@@ -139,7 +139,7 @@ jobs:
             ## Docker Image
 
             ```bash
-            docker pull ghcr.io/${{ github.repository_owner }}/claude-sandbox:${{ needs.merge.outputs.version }}
+            docker pull ghcr.io/${{ github.repository_owner }}/agent-sandbox:${{ needs.merge.outputs.version }}
             ```
 
             **Digest:** `${{ needs.merge.outputs.digest }}`

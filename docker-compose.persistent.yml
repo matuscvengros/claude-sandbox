@@ -2,7 +2,7 @@
 # Used with: docker compose -f docker-compose.yml -f docker-compose.persistent.yml ...
 # Invoked by `cc`, `oc`, `cx`, `pi` (default persistent mode).
 services:
-  claude-sandbox:
+  agent-sandbox:
     volumes:
       # General config (shared across all tools)
       - "$HOME/.config/git:/home/claude/.config/git"

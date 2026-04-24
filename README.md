@@ -1,13 +1,13 @@
-# Docker Sandbox for Claude Code
+# Docker Sandbox for Agents
 
-[![Build](https://github.com/matuscvengros/claude-sandbox/actions/workflows/build.yml/badge.svg)](https://github.com/matuscvengros/claude-sandbox/actions/workflows/build.yml)
-[![Release](https://github.com/matuscvengros/claude-sandbox/actions/workflows/release.yml/badge.svg)](https://github.com/matuscvengros/claude-sandbox/actions/workflows/release.yml)
-[![Nightly](https://github.com/matuscvengros/claude-sandbox/actions/workflows/nightly.yml/badge.svg)](https://github.com/matuscvengros/claude-sandbox/actions/workflows/nightly.yml)
+[![Build](https://github.com/matuscvengros/agent-sandbox/actions/workflows/build.yml/badge.svg)](https://github.com/matuscvengros/agent-sandbox/actions/workflows/build.yml)
+[![Release](https://github.com/matuscvengros/agent-sandbox/actions/workflows/release.yml/badge.svg)](https://github.com/matuscvengros/agent-sandbox/actions/workflows/release.yml)
+[![Nightly](https://github.com/matuscvengros/agent-sandbox/actions/workflows/nightly.yml/badge.svg)](https://github.com/matuscvengros/agent-sandbox/actions/workflows/nightly.yml)
 [![Docker](https://img.shields.io/badge/docker-python%3A3.14--bookworm-blue?logo=docker)](https://hub.docker.com/_/python)
-[![Platform](https://img.shields.io/badge/platform-linux%2Famd64%20%7C%20linux%2Farm64-lightgrey?logo=linux)](https://ghcr.io/matuscvengros/claude-sandbox)
+[![Platform](https://img.shields.io/badge/platform-linux%2Famd64%20%7C%20linux%2Farm64-lightgrey?logo=linux)](https://ghcr.io/matuscvengros/agent-sandbox)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
-Docker container for running Claude Code autonomously in an isolated sandbox. Based on `python:3.14-bookworm` with Node.js 24 grafted in. Built for macOS hosts using OrbStack where Docker Sandbox isn't available.
+Docker container for running AI coding agents (Claude Code, OpenAI Codex, OpenCode, Pi) autonomously in an isolated sandbox. Based on `python:3.14-bookworm` with Node.js 24 grafted in. Built for macOS hosts using OrbStack where Docker Sandbox isn't available.
 
 ## Pre-installed tools
 
@@ -92,7 +92,7 @@ To build the image from the Dockerfile instead, use the build overlay:
 docker compose -f docker-compose.yml -f docker-compose.build.yml build
 ```
 
-Or let the `cc` helper do it via `cc -b` / `cc --build`. A local build tags the image as `claude-sandbox` and leaves the pulled GHCR image untouched.
+Or let the `cc` helper do it via `cc -b` / `cc --build`. A local build tags the image as `agent-sandbox` and leaves the pulled GHCR image untouched.
 
 To rebuild from scratch (no cache):
 
@@ -119,12 +119,12 @@ Internally all four delegate to a shared `_sandbox_run` function (in `shell/.zsh
 
 ```bash
 # zsh (macOS default)
-echo 'export DOCKER_SANDBOX_DIR="$HOME/path/to/claude-docker-sandbox"' >> ~/.zshrc
+echo 'export DOCKER_SANDBOX_DIR="$HOME/path/to/agent-sandbox"' >> ~/.zshrc
 cat shell/.zshrc >> ~/.zshrc
 source ~/.zshrc
 
 # bash (Linux default)
-echo 'export DOCKER_SANDBOX_DIR="$HOME/path/to/claude-docker-sandbox"' >> ~/.bashrc
+echo 'export DOCKER_SANDBOX_DIR="$HOME/path/to/agent-sandbox"' >> ~/.bashrc
 cat shell/.bashrc >> ~/.bashrc
 source ~/.bashrc
 ```
@@ -174,7 +174,7 @@ pi -sh                        # drop into a shell instead of Pi
 
 **`<cmd>`** (default) uses the pulled GHCR image and mounts every agent's persistent state into the container, preserving conversation history, sessions, and auth across runs. `cc` adds `--dangerously-skip-permissions`; the other three pass no default flags.
 
-**`<cmd> -b` / `<cmd> --build`** builds the image locally from the Dockerfile before running. The local build is tagged `claude-sandbox` and doesn't affect the pulled GHCR image.
+**`<cmd> -b` / `<cmd> --build`** builds the image locally from the Dockerfile before running. The local build is tagged `agent-sandbox` and doesn't affect the pulled GHCR image.
 
 **`<cmd> -bf` / `<cmd> --build-force`** same as `--build` but passes `--no-cache` to Docker, bypassing the layer cache. Useful when a cached layer is masking a script change (e.g., `scripts/*`).
 
@@ -196,13 +196,13 @@ Without the shell function:
 
 ```bash
 # Interactive
-docker compose run --rm claude-sandbox
+docker compose run --rm agent-sandbox
 
 # Prompt mode
-docker compose run --rm claude-sandbox -- -p "build a REST API for todos"
+docker compose run --rm agent-sandbox -- -p "build a REST API for todos"
 
 # Override model
-docker compose run --rm claude-sandbox -- --model sonnet -p "build a REST API"
+docker compose run --rm agent-sandbox -- --model sonnet -p "build a REST API"
 ```
 
 Use `--` to separate Docker flags from Claude flags. Use `--rm` to automatically remove the container after it exits.
@@ -250,7 +250,7 @@ This repo is a plain public build. To add private plugins, private apt packages,
 
 ```dockerfile
 # your-private-repo/Dockerfile
-FROM ghcr.io/matuscvengros/claude-sandbox:latest
+FROM ghcr.io/matuscvengros/agent-sandbox:latest
 
 # Add your private plugins, tools, config, etc.
 RUN --mount=type=ssh \
@@ -258,7 +258,7 @@ RUN --mount=type=ssh \
     && claude plugin install your-plugin@your-plugins
 ```
 
-That repo can tag its image as `claude-sandbox` locally (matching the name the `cc` helper expects) or give it any other tag and point `image:` in `docker-compose.yml` at it.
+That repo can tag its image as `agent-sandbox` locally (matching the name the `cc` helper expects) or give it any other tag and point `image:` in `docker-compose.yml` at it.
 
 ## Mount layout
 
@@ -298,7 +298,7 @@ Runs on every push and pull request to `main`. Builds the image with Docker Buil
 Runs nightly (14:00 UTC) and on manual trigger. Builds the image for `linux/amd64` and `linux/arm64`, and pushes to GHCR with the `latest` tag. This keeps the public image up to date with the latest Claude Code CLI version.
 
 ```bash
-docker pull ghcr.io/matuscvengros/claude-sandbox:latest
+docker pull ghcr.io/matuscvengros/agent-sandbox:latest
 ```
 
 ### Release workflow
@@ -306,7 +306,7 @@ docker pull ghcr.io/matuscvengros/claude-sandbox:latest
 Triggered by version tags (`v*`). Builds multi-platform images (`linux/amd64`, `linux/arm64`) and pushes to GHCR:
 
 ```bash
-docker pull ghcr.io/matuscvengros/claude-sandbox:<version>
+docker pull ghcr.io/matuscvengros/agent-sandbox:<version>
 ```
 
 A GitHub Release with auto-generated release notes is created alongside the image.

@@ -8,7 +8,7 @@ FROM node:24 AS node-src
 # ===========================================================================
 FROM python:3.14-bookworm
 
-LABEL org.opencontainers.image.title="claude-sandbox"
+LABEL org.opencontainers.image.title="agent-sandbox"
 
 ARG DEBIAN_FRONTEND=noninteractive
 

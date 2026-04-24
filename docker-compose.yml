@@ -1,7 +1,7 @@
-name: claude-sandbox
+name: agent-sandbox
 services:
-  claude-sandbox:
-    image: ghcr.io/matuscvengros/claude-sandbox:latest
+  agent-sandbox:
+    image: ghcr.io/matuscvengros/agent-sandbox:latest
     user: claude
     env_file: .env
     working_dir: ${PWD}
