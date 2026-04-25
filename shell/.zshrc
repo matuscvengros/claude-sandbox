@@ -2,8 +2,8 @@
 #
 # Launch one of four AI-agent CLIs inside the agent-sandbox container:
 #   cc      Claude Code        (claude --dangerously-skip-permissions)
-#   cdx     OpenAI Codex       (codex --yolo)
-#   oc      OpenCode           (opencode --yolo)
+#   cx      OpenAI Codex       (codex --yolo)
+#   oc      OpenCode           (opencode)
 #   pidev   Pi Coding Agent    (pi)
 #
 # All four wrappers delegate to `_sandbox_run`. See `<agent> -h` for usage.
@@ -14,7 +14,7 @@
 _sandbox_help() {
     cat <<'EOF'
 Launches an AI-agent CLI inside the agent-sandbox Docker container.
-Available agents: cc (Claude Code), cdx (Codex), oc (OpenCode), pidev (Pi
+Available agents: cc (Claude Code), cx (Codex), oc (OpenCode), pidev (Pi
 Coding Agent). All accept the same flags.
 
 Usage: <agent> [options] [-- extra args passed to the agent]
@@ -169,15 +169,15 @@ cc() {
     _sandbox_run "$@"
 }
 
-# cdx — OpenAI Codex
-cdx() {
+# cx — OpenAI Codex
+cx() {
     local -a agent_command=(codex --yolo)
     _sandbox_run "$@"
 }
 
 # oc — OpenCode
 oc() {
-    local -a agent_command=(opencode --yolo)
+    local -a agent_command=(opencode)
     _sandbox_run "$@"
 }
 
