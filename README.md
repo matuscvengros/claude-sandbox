@@ -111,7 +111,7 @@ Four launchers — one per AI agent — all share the same sandbox image, compos
 | `oc` | SST opencode       | `opencode --yolo` |
 | `pidev` | Pi Coding Agent    | `pi` |
 
-Internally all four delegate to a shared `_sandbox_run` function (in `shell/.zshrc` and `shell/.bashrc`). Each wrapper just sets the tool name + default args and calls the runner. In persistent mode (the default), the launcher pre-creates expected state files/directories, then mounts shared config (`~/.config/git`, `~/.config/gh`) plus every agent's state dir (`~/.claude`, `~/.claude.json`, `~/.codex`, `~/.config/opencode`, `~/.pi`), so session history, settings, and auth are unified with the host.
+Internally all four delegate to a shared `_sandbox_run` function (in `shell/.zshrc` and `shell/.bashrc`). Each wrapper just sets the tool name + default args and calls the runner. In persistent mode (the default), the launcher pre-creates expected state files/directories, then mounts shared config (`~/.config/git`, `~/.config/gh`) plus every agent's state dir (`~/.claude`, `~/.claude.json`, `~/.codex`, `~/.config/opencode`, `~/.pi`), so session history, settings, and auth are unified with the host. The persistent overlay also masks Codex's bundled `browser-use` and `computer-use` plugin cache directories with tmpfs mounts.
 
 ### Setup (macOS with OrbStack)
 
@@ -188,22 +188,30 @@ The current directory is automatically mounted into the container at the same ab
 
 ## Usage
 
-### Standalone (headless / CLI)
+### Standalone Compose
 
 Without the shell function:
 
 ```bash
-# Interactive
+# Bash shell (the image default)
 docker compose run --rm agent-sandbox
 
-# Prompt mode
-docker compose run --rm agent-sandbox -- -p "build a REST API for todos"
+# Claude Code interactive
+docker compose run --rm agent-sandbox claude --dangerously-skip-permissions
 
-# Override model
-docker compose run --rm agent-sandbox -- --model sonnet -p "build a REST API"
+# Claude Code prompt mode
+docker compose run --rm agent-sandbox claude --dangerously-skip-permissions -p "build a REST API for todos"
+
+# Override Claude model
+docker compose run --rm agent-sandbox claude --dangerously-skip-permissions --model sonnet -p "build a REST API"
+
+# Other installed agents
+docker compose run --rm agent-sandbox codex --yolo
+docker compose run --rm agent-sandbox opencode --yolo
+docker compose run --rm agent-sandbox pi
 ```
 
-Use `--` to separate Docker flags from Claude flags. Use `--rm` to automatically remove the container after it exits.
+Use `--rm` to automatically remove the container after it exits. Add `-f docker-compose.persistent.yml` to the compose command when you want the same host state mounts that the shell launchers use by default.
 
 ## SSH & authentication
 
@@ -273,10 +281,12 @@ The Dockerfile intentionally uses floating current releases within the Python 3.
 | `/home/agent/.claude` | `$HOME/.claude` | Read/Write | Claude Code state (persistent mode only) |
 | `/home/agent/.claude.json` | `$HOME/.claude.json` | Read/Write | Claude Code config (persistent mode only) |
 | `/home/agent/.codex` | `$HOME/.codex` | Read/Write | Codex config + state (persistent mode only) |
+| `/home/agent/.codex/plugins/cache/openai-bundled/browser-use` | tmpfs | Read/Write | Masks bundled Codex browser-use plugin cache (persistent mode only) |
+| `/home/agent/.codex/plugins/cache/openai-bundled/computer-use` | tmpfs | Read/Write | Masks bundled Codex computer-use plugin cache (persistent mode only) |
 | `/home/agent/.config/opencode` | `$HOME/.config/opencode` | Read/Write | opencode config (persistent mode only) |
 | `/home/agent/.pi` | `$HOME/.pi` | Read/Write | Pi Coding Agent config + sessions (persistent mode only) |
 
-The current directory is mounted into the container at the **same absolute path** it has on the host (1:1 mirror). This preserves Claude's per-project session keys (`~/.claude/projects/<path-encoded>`) across host and container and lets the startup trust scripts mark the exact host path as trusted for Claude and Codex.
+The current directory is mounted into the container at the **same absolute path** it has on the host (1:1 mirror). This preserves Claude's per-project session keys (`~/.claude/projects/<path-encoded>`) across host and container and lets the startup trust scripts mark the exact host path as trusted for Claude and Codex. At startup, the entrypoint also creates a convenience symlink at `/home/agent/<workspace-basename>` when that path does not already exist.
 
 ## Environment variables
 
@@ -318,7 +328,9 @@ A GitHub Release with auto-generated release notes is created alongside the imag
 The container ships with these agent defaults:
 
 - **Claude model:** `opus` (configured in `claude/settings.json`)
+- **Claude effort:** `xhigh`
 - **Claude permissions:** `bypassPermissions` (autonomous mode) with `.env` files denied
 - **Workspace trust:** Automatically granted at container start for the mounted working directory (`scripts/setup-claude-workdir-trust.sh`, `scripts/setup-codex-workdir-trust.sh`)
 - **Claude onboarding:** Skipped (pre-configured in `claude/.claude.json`)
 - **Claude auto-updates:** Enabled
+- **Claude voice:** Disabled

@@ -16,3 +16,6 @@ services:
       - "$HOME/.config/opencode:/home/agent/.config/opencode"
       # Pi
       - "$HOME/.pi:/home/agent/.pi"
+    tmpfs:
+      - /home/agent/.codex/plugins/cache/openai-bundled/browser-use
+      - /home/agent/.codex/plugins/cache/openai-bundled/computer-use
