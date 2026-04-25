@@ -1,6 +1,6 @@
 # Overlay that mounts host Claude/config state into the container for persistent mode.
 # Used with: docker compose -f docker-compose.yml -f docker-compose.persistent.yml ...
-# Invoked by `sbxcc`, `sbxoc`, `sbxcx`, `sbxpi` (default persistent mode).
+# Invoked by `cc`, `cdx`, `oc`, `pidev` (default persistent mode).
 services:
   agent-sandbox:
     volumes:

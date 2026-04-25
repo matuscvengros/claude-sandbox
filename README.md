@@ -80,7 +80,7 @@ The sandbox defaults to pulling the nightly-published image from GHCR — no bui
 docker compose pull
 ```
 
-That's it. `sbxcc` will `docker compose run` against the pulled image on every invocation.
+That's it. `cc` will `docker compose run` against the pulled image on every invocation.
 
 **Alternative: local build**
 
@@ -90,7 +90,7 @@ To build the image from the Dockerfile instead, use the build overlay:
 docker compose -f docker-compose.yml -f docker-compose.build.yml build
 ```
 
-Or let the `sbxcc` helper do it via `sbxcc -b` / `sbxcc --build`. A local build tags the image as `agent-sandbox` and leaves the pulled GHCR image untouched.
+Or let the `cc` helper do it via `cc -b` / `cc --build`. A local build tags the image as `agent-sandbox` and leaves the pulled GHCR image untouched.
 
 To rebuild from scratch (no cache):
 
@@ -98,7 +98,7 @@ To rebuild from scratch (no cache):
 docker compose -f docker-compose.yml -f docker-compose.build.yml build --no-cache
 ```
 
-Or via the helper: `sbxcc -bf` / `sbxcc --build-force`.
+Or via the helper: `cc -bf` / `cc --build-force`.
 
 ## Shell functions
 
@@ -106,10 +106,10 @@ Four launchers — one per AI agent — all share the same sandbox image, compos
 
 | Command | Tool | Container command |
 |---------|------|-------------------|
-| `sbxcc` | Claude Code        | `claude --dangerously-skip-permissions` |
-| `sbxoc` | SST opencode       | `opencode --yolo` |
-| `sbxcx` | OpenAI Codex       | `codex --yolo` |
-| `sbxpi` | Pi Coding Agent    | `pi` |
+| `cc` | Claude Code        | `claude --dangerously-skip-permissions` |
+| `cdx` | OpenAI Codex       | `codex --yolo` |
+| `oc` | SST opencode       | `opencode --yolo` |
+| `pidev` | Pi Coding Agent    | `pi` |
 
 Internally all four delegate to a shared `_sandbox_run` function (in `shell/.zshrc` and `shell/.bashrc`). Each wrapper just sets the tool name + default args and calls the runner. In persistent mode (the default), the launcher pre-creates expected state files/directories, then mounts shared config (`~/.config/git`, `~/.config/gh`) plus every agent's state dir (`~/.claude`, `~/.claude.json`, `~/.codex`, `~/.config/opencode`, `~/.pi`), so session history, settings, and auth are unified with the host.
 
@@ -134,43 +134,43 @@ From any project directory:
 ```bash
 cd ~/my-project
 
-sbxcc                         # run Claude Code, pulled GHCR image, persistent state
-sbxcc -- -p "build a REST API" # prompt mode, persistent state
-sbxcc -- --model sonnet       # override default model
+cc                         # run Claude Code, pulled GHCR image, persistent state
+cc -- -p "build a REST API" # prompt mode, persistent state
+cc -- --model sonnet       # override default model
 
-sbxcc -b                      # build image locally, then run
-sbxcc -bf                     # build locally with --no-cache, then run
-sbxcc --build -is             # build locally, isolated run
+cc -b                      # build image locally, then run
+cc -bf                     # build locally with --no-cache, then run
+cc --build -is             # build locally, isolated run
 
-sbxcc -is                     # interactive, isolated (no host state)
-sbxcc --isolated -- -p "task" # prompt mode, isolated
+cc -is                     # interactive, isolated (no host state)
+cc --isolated -- -p "task" # prompt mode, isolated
 
-sbxcc -v ~/data               # mount ~/data into container as ~/data (read-write)
-sbxcc -rov ~/config           # mount ~/config as read-only
-sbxcc -v ~/a -rov ~/b         # multiple extra volumes
-sbxcc -v ~/dir1/dir2/dir3     # mounts as ~/dir3 (basename only)
+cc -v ~/data               # mount ~/data into container as ~/data (read-write)
+cc -rov ~/config           # mount ~/config as read-only
+cc -v ~/a -rov ~/b         # multiple extra volumes
+cc -v ~/dir1/dir2/dir3     # mounts as ~/dir3 (basename only)
 
-sbxcc -sh                     # drop into a bash shell
-sbxcc --shell                 # same thing
+cc -sh                     # drop into a bash shell
+cc --shell                 # same thing
 
-sbxcc -h                      # show help
+cc -h                      # show help
 ```
 
-`sbxoc`, `sbxcx`, and `sbxpi` accept the exact same flags — every example above applies verbatim with the command name swapped:
+`cdx`, `oc`, and `pidev` accept the exact same flags — every example above applies verbatim with the command name swapped:
 
 ```bash
-sbxoc                         # opencode, pulled image, persistent state
-sbxcx                         # Codex, pulled image, persistent state
-sbxpi                         # Pi Coding Agent, pulled image, persistent state
+cdx                         # Codex, pulled image, persistent state
+oc                          # opencode, pulled image, persistent state
+pidev                       # Pi Coding Agent, pulled image, persistent state
 
-sbxoc -is                     # isolated opencode
-sbxcx -b -- --model gpt-5     # build locally, pass --model through to codex
-sbxpi -sh                     # drop into a shell instead of Pi
+cdx -b -- --model gpt-5     # build locally, pass --model through to codex
+oc -is                      # isolated opencode
+pidev -sh                   # drop into a shell instead of Pi
 ```
 
 ### Flags (shared across all four launchers)
 
-**`<agent>`** (default) uses the pulled GHCR image and mounts every agent's persistent state into the container, preserving conversation history, sessions, and auth across runs. `sbxcc` adds `--dangerously-skip-permissions`, while `sbxoc` and `sbxcx` add `--yolo`.
+**`<agent>`** (default) uses the pulled GHCR image and mounts every agent's persistent state into the container, preserving conversation history, sessions, and auth across runs. `cc` adds `--dangerously-skip-permissions`, while `cdx` and `oc` add `--yolo`.
 
 **`<agent> -b` / `<agent> --build`** builds the image locally from the Dockerfile before running. The local build is tagged `agent-sandbox` and doesn't affect the pulled GHCR image.
 
@@ -256,7 +256,7 @@ RUN --mount=type=ssh \
     && claude plugin install your-plugin@your-plugins
 ```
 
-That repo can tag its image as `agent-sandbox` locally (matching the name the `sbxcc` helper expects) or give it any other tag and point `image:` in `docker-compose.yml` at it.
+That repo can tag its image as `agent-sandbox` locally (matching the name the `cc` helper expects) or give it any other tag and point `image:` in `docker-compose.yml` at it.
 
 ## Fresh builds
 
@@ -276,7 +276,7 @@ The Dockerfile intentionally uses floating current releases within the Python 3.
 | `/home/agent/.config/opencode` | `$HOME/.config/opencode` | Read/Write | opencode config (persistent mode only) |
 | `/home/agent/.pi` | `$HOME/.pi` | Read/Write | Pi Coding Agent config + sessions (persistent mode only) |
 
-The current directory is mounted into the container at the **same absolute path** it has on the host (1:1 mirror). This preserves Claude's per-project session keys (`~/.claude/projects/<path-encoded>`) across host and container.
+The current directory is mounted into the container at the **same absolute path** it has on the host (1:1 mirror). This preserves Claude's per-project session keys (`~/.claude/projects/<path-encoded>`) across host and container and lets the startup trust scripts mark the exact host path as trusted for Claude and Codex.
 
 ## Environment variables
 
@@ -315,10 +315,10 @@ A GitHub Release with auto-generated release notes is created alongside the imag
 
 ## Container defaults
 
-The container ships with these Claude Code defaults (configured in `claude/settings.json`):
+The container ships with these agent defaults:
 
-- **Model:** `opus`
-- **Permissions:** `bypassPermissions` (autonomous mode) with `.env` files denied
-- **Workspace trust:** Automatically granted at container start for the mounted working directory (`scripts/setup-claude-workdir-trust.sh`)
-- **Onboarding:** Skipped (pre-configured in `claude/.claude.json`)
-- **Auto-updates:** Enabled
+- **Claude model:** `opus` (configured in `claude/settings.json`)
+- **Claude permissions:** `bypassPermissions` (autonomous mode) with `.env` files denied
+- **Workspace trust:** Automatically granted at container start for the mounted working directory (`scripts/setup-claude-workdir-trust.sh`, `scripts/setup-codex-workdir-trust.sh`)
+- **Claude onboarding:** Skipped (pre-configured in `claude/.claude.json`)
+- **Claude auto-updates:** Enabled

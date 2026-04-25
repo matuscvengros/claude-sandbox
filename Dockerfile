@@ -203,6 +203,7 @@ COPY --chmod=755 scripts/entrypoint.sh /entrypoint.sh
 COPY --chmod=755 --chown=agent:agent scripts/setup-credentials.sh /tmp/setup-credentials.sh
 ## Trust
 COPY --chmod=755 --chown=agent:agent scripts/setup-claude-workdir-trust.sh /tmp/setup-claude-workdir-trust.sh
+COPY --chmod=755 --chown=agent:agent scripts/setup-codex-workdir-trust.sh /tmp/setup-codex-workdir-trust.sh
 
 # -- Healthcheck ------------------------------------------------------------
 HEALTHCHECK --interval=30s --timeout=5s CMD claude --version || exit 1

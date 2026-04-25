@@ -1,10 +1,10 @@
 # Agent Sandbox Launchers
 #
 # Launch one of four AI-agent CLIs inside the agent-sandbox container:
-#   sbxcc   Claude Code        (claude --dangerously-skip-permissions)
-#   sbxoc   OpenCode           (opencode --yolo)
-#   sbxcx   OpenAI Codex       (codex --yolo)
-#   sbxpi   Pi Coding Agent    (pi)
+#   cc      Claude Code        (claude --dangerously-skip-permissions)
+#   cdx     OpenAI Codex       (codex --yolo)
+#   oc      OpenCode           (opencode --yolo)
+#   pidev   Pi Coding Agent    (pi)
 #
 # All four wrappers delegate to `_sandbox_run`. See `<agent> -h` for usage.
 
@@ -14,7 +14,7 @@
 _sandbox_help() {
     cat <<'EOF'
 Launches an AI-agent CLI inside the agent-sandbox Docker container.
-Available agents: sbxcc (Claude Code), sbxoc (OpenCode), sbxcx (Codex), sbxpi (Pi
+Available agents: cc (Claude Code), cdx (Codex), oc (OpenCode), pidev (Pi
 Coding Agent). All accept the same flags.
 
 Usage: <agent> [options] [-- extra args passed to the agent]
@@ -163,26 +163,26 @@ _sandbox_run() {
 # Wrappers — one per AI-agent CLI.
 # ---------------------------------------------------------------------------
 
-# sbxcc — Claude Code
-sbxcc() {
+# cc — Claude Code
+cc() {
     local -a agent_command=(claude --dangerously-skip-permissions)
     _sandbox_run "$@"
 }
 
-# sbxoc — OpenCode
-sbxoc() {
-    local -a agent_command=(opencode --yolo)
-    _sandbox_run "$@"
-}
-
-# sbxcx — OpenAI Codex
-sbxcx() {
+# cdx — OpenAI Codex
+cdx() {
     local -a agent_command=(codex --yolo)
     _sandbox_run "$@"
 }
 
-# sbxpi — Pi Coding Agent
-sbxpi() {
+# oc — OpenCode
+oc() {
+    local -a agent_command=(opencode --yolo)
+    _sandbox_run "$@"
+}
+
+# pidev — Pi Coding Agent
+pidev() {
     local -a agent_command=(pi)
     _sandbox_run "$@"
 }
