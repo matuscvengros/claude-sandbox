@@ -138,6 +138,8 @@ _sandbox_run() {
             run_status=$?
             ;;
         shell)
+            _sandbox_prepare_persistent_state || return 1
+            compose+=(-f "$DOCKER_SANDBOX_DIR/docker-compose.persistent.yml")
             "${compose[@]}" run --rm \
                 "${extra_vols[@]}" \
                 agent-sandbox "$@"
